@@ -1,1 +1,2 @@
 # dependencies of the i18n portion
+ae_core
