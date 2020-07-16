@@ -249,7 +249,8 @@ def init_installed_languages():
 
     for path in locale_paths:
         if os.path.exists(path):
-            installed_languages.extend(dir_entry.name for dir_entry in os.scandir(path) if dir_entry.is_dir())
+            installed_languages.extend(dir_entry.name for dir_entry in os.scandir(path)
+                                       if dir_entry.is_dir() and dir_entry.name != '__pycache__')
 
 
 # load and set the system/os locale/language/encoding as the app defaults at startup (import)
