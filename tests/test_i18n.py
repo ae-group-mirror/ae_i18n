@@ -90,6 +90,11 @@ class TestLangLoading:
         init_installed_languages()
         assert installed_languages[0] == lang_file_es
 
+        assert not loaded_languages
+        assert default_language(lang_file_es) != lang_file_es       # change and load test language
+        assert loaded_languages
+        assert default_language() == lang_file_es
+
     def test_load_language_texts_str(self, lang_file_es):
         add_paths('tests')
         load_language_texts(lang_file_es)
@@ -129,7 +134,7 @@ class TestWithLoadedTranslations:
         assert f_("{glo_var}{loc_var}") == glo_var + loc_var
 
     def test_get_text_pluralized(self, lang_file_es):
-        assert _(test_message_texts[2]) == test_message_texts[2]
+        assert _(test_message_texts[2]) == 'a'
         assert _(test_message_texts[2], language=lang_file_es) == 'a'    # any
 
 
@@ -166,19 +171,13 @@ class TestCount:
 
 class TestLocaleSwitch:
     def test_get_text(self, lang_file_es):
-        add_paths('tests')
-        load_language_texts(lang_file_es)
-
+        # already added: add_paths('tests')
         assert _("tst_msg") == "tst_msg"
         assert _("tst_msg", language=lang_file_es) == "tst_msg"
         assert _("tst_msg", language='not_loaded_lang_code') == "tst_msg"
 
-        assert _(test_message_texts[0]) == test_message_texts[0]
         assert _(test_message_texts[0], language=lang_file_es) == "t m " + test_message_texts[0][-1]
         assert _(test_message_texts[0], language='not_loaded_lang_code') == test_message_texts[0]
-
-        assert default_language(lang_file_es) != lang_file_es
-        assert default_language() == lang_file_es
 
         assert _("tst_msg") == "tst_msg"
         assert _("tst_msg", language=lang_file_es) == "tst_msg"

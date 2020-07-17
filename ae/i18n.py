@@ -68,7 +68,7 @@ from typing import Any, Dict, List, Optional, Union
 from ae.core import stack_variables, try_eval  # type: ignore
 
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 
 MsgType = Union[str, Dict[str, str]]                    #: type of message translations within :data:`MSG_FILE_SUFFIX`
@@ -76,12 +76,14 @@ LanguageMessages = Dict[str, MsgType]                   #: type of the data stru
 
 
 MSG_FILE_SUFFIX = 'Msg.txt'                             #: file name containing translated texts of a language/locale
+DEF_LANGUAGE = 'en_US'                                  #: language code of the messages in your app code
+DEF_ENCODING = 'UTF-8'                                  #: encoding of the messages in your app code
 
 _LANG, _ENC = locale.getdefaultlocale()
 if not _LANG:
-    _LANG = 'en_US'     # pragma: no cover
+    _LANG = DEF_LANGUAGE     # pragma: no cover
 if not _ENC:
-    _ENC = 'UTF-8'      # pragma: no cover
+    _ENC = DEF_ENCODING      # pragma: no cover
 default_locale: List[str] = [_LANG, _ENC]               #: language and encoding code of the current language/locale
 del _LANG, _ENC
 
@@ -99,6 +101,8 @@ def default_language(new_lang: str = '') -> str:
     old_lang = default_locale[0]
     if new_lang:
         default_locale[0] = new_lang
+        if new_lang in installed_languages and new_lang not in loaded_languages:
+            load_language_texts(new_lang)
     return old_lang
 
 
