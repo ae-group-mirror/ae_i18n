@@ -68,7 +68,7 @@ from typing import Any, Dict, List, Optional, Union
 from ae.core import stack_variables, try_eval  # type: ignore
 
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
 
 MsgType = Union[str, Dict[str, str]]                    #: type of message translations within :data:`MSG_FILE_SUFFIX`
@@ -197,7 +197,7 @@ _ = get_text         #: alias of :func:`get_text`.
 def get_f_string(f_string: str, count: Optional[int] = None, language: str = '',
                  glo_vars: Optional[Dict[str, Any]] = None, loc_vars: Optional[Dict[str, Any]] = None
                  ) -> str:
-    """ translate passed f-string into a f-string of the current language.
+    """ translate passed f-string into a message string of the passed / default language.
 
     :param f_string:    f-string to be translated and evaluated.
     :param count:       pass if the translated text changes on pluralization (see :func:`get_text`).
@@ -220,7 +220,9 @@ def get_f_string(f_string: str, count: Optional[int] = None, language: str = '',
         assert isinstance(glo_vars, dict)       # mypy
         glo_vars['count'] = count
 
-    return try_eval('f"' + f_string + '"', ignored_exceptions=(Exception, ), glo_vars=glo_vars, loc_vars=loc_vars) \
+    return (
+        '{' in f_string and '}' in f_string
+        and try_eval('f"' + f_string + '"', ignored_exceptions=(Exception, ), glo_vars=glo_vars, loc_vars=loc_vars)) \
         or f_string
 
 
@@ -261,5 +263,3 @@ def init_installed_languages():
 init_installed_languages()
 if default_locale[0] in installed_languages:  # pragma: no cover
     load_language_texts(default_locale[0], encoding=default_locale[1])
-    default_language(default_locale[0])
-    default_encoding(default_locale[1])
