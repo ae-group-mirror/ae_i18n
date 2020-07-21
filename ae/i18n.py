@@ -68,7 +68,7 @@ from typing import Any, Dict, List, Optional, Union
 from ae.core import stack_variables, try_eval  # type: ignore
 
 
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 
 
 MsgType = Union[str, Dict[str, str]]                    #: type of message translations within :data:`MSG_FILE_SUFFIX`
@@ -255,8 +255,9 @@ def init_installed_languages():
 
     for path in locale_paths:
         if os.path.exists(path):
-            installed_languages.extend(dir_entry.name for dir_entry in os.scandir(path)
-                                       if dir_entry.is_dir() and dir_entry.name != '__pycache__')
+            installed_languages.extend(
+                dir_entry.name for dir_entry in os.scandir(path)
+                if dir_entry.is_dir() and os.path.exists(os.path.join(dir_entry.path, MSG_FILE_SUFFIX)))
 
 
 # load and set the system/os locale/language/encoding as the app defaults at startup (import)
