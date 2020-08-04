@@ -50,7 +50,7 @@ keyword argument of :func:`get_text` (or :func:`get_f_string`)::
     print(_("child", count=3))     # translated into "children" (in english) or e.g. "Kinder" in german
 
     print(f_("you have {count] children", count=1))  # -> "you have 1 child" or e.g. "Sie haben 1 Kind"
-    print(f_("you have {count] children", count=1))  # -> "you have 3 children" or e.g. "Sie haben 3 Kinder"
+    print(f_("you have {count] children", count=3))  # -> "you have 3 children" or e.g. "Sie haben 3 Kinder"
 
 You can load several languages into your app run-time. For to get the translation for a language
 that is not the current default language you have to pass the :paramref:`~get_text.language` keyword argument
@@ -65,10 +65,10 @@ import locale
 import os
 from typing import Any, Dict, List, Optional, Union
 
-from ae.core import stack_variables, try_eval  # type: ignore
+from ae.core import stack_variables, try_eval           # type: ignore
 
 
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 
 
 MsgType = Union[str, Dict[str, str]]                    #: type of message translations within :data:`MSG_FILE_SUFFIX`
@@ -214,7 +214,7 @@ def get_f_string(f_string: str, count: Optional[int] = None, language: str = '',
     f_string = get_text(f_string, count=count, language=language)
 
     if not glo_vars and not loc_vars:
-        glo_vars, loc_vars, _ = stack_variables(min_depth=3, max_depth=3)
+        glo_vars, loc_vars, _ = stack_variables(max_depth=3)
 
     if count is not None:
         assert isinstance(glo_vars, dict)       # mypy
