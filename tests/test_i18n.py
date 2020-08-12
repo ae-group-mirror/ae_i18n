@@ -10,7 +10,7 @@ from ae.i18n import (
 
 
 test_message_texts = ("test message 1", "test message 2", "pluralize-able")
-pluralize_keys = ('zero', 'one', 'many', 'negative', 'any')
+pluralize_keys = ('zero', 'one', 'many', 'negative', '')
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def lang_file_es():
         file_handle.write('{\n')
         file_handle.write(',\n'.join(['"' + t + '": "t m ' + t[-1] + '"' for t in test_message_texts[:2]]))
         file_handle.write(',\n"' + test_message_texts[2] + '": {')
-        file_handle.write(', '.join(['"' + t + '": "' + t[0] + '"' for t in pluralize_keys]) + '}\n')
+        file_handle.write(', '.join(['"' + t + '": "' + t[:1] + '"' for t in pluralize_keys]) + '}\n')
         file_handle.write('}\n')
     yield lang
     if os.path.exists(fn):      # check if file exists because some exception/error-check tests need to delete the file
@@ -110,7 +110,7 @@ class TestLangLoading:
 
         assert isinstance(loaded_languages[lang_file_es][test_message_texts[2]], dict)
         for t in pluralize_keys:
-            assert loaded_languages[lang_file_es][test_message_texts[2]][t] == t[0]
+            assert loaded_languages[lang_file_es][test_message_texts[2]][t] == t[:1]
 
 
 class TestWithLoadedTranslations:
@@ -134,8 +134,8 @@ class TestWithLoadedTranslations:
         assert f_("{glo_var}{loc_var}") == glo_var + loc_var
 
     def test_get_text_pluralized(self, lang_file_es):
-        assert _(test_message_texts[2]) == 'a'
-        assert _(test_message_texts[2], language=lang_file_es) == 'a'    # any
+        assert _(test_message_texts[2]) == ''
+        assert _(test_message_texts[2], language=lang_file_es) == ''    # any
 
 
 class TestCount:
@@ -145,6 +145,7 @@ class TestCount:
     def test_f_string_locals(self):
         loc_var = 'loc_var_val'
         assert f_("{loc_var}", count=4) == loc_var
+        assert f_("{loc_var}", count=4, loc_vars=dict(loc_var=loc_var)) == loc_var
 
     def test_f_string_globals(self):
         assert f_("{glo_var}", count=5) == glo_var
@@ -163,10 +164,10 @@ class TestCount:
         assert _(test_message_texts[2], count=999, language=lang_file_es) == "m"
 
     def test_get_text_pluralized_without_count(self, lang_file_es):
-        assert _(test_message_texts[2], language=lang_file_es) == "a"       # any
+        assert _(test_message_texts[2], language=lang_file_es) == ""       # any
 
     def test_f_string_pluralized_without_count(self, lang_file_es):
-        assert f_(test_message_texts[2], language=lang_file_es) == "a"      # any
+        assert f_(test_message_texts[2], language=lang_file_es) == ""      # any
 
 
 class TestLocaleSwitch:
@@ -216,7 +217,7 @@ class TestLocaleSwitch:
 
     def test_get_text_pluralized(self, lang_file_es):
         default_language(lang_file_es)
-        assert _(test_message_texts[2]) == "a"  # any
+        assert _(test_message_texts[2]) == ""               # any
         assert _(test_message_texts[2], count=-1) == "n"    # negative
         assert _(test_message_texts[2], count=0) == "z"     # zero
         assert _(test_message_texts[2], count=1) == "o"     # one
