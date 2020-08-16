@@ -67,12 +67,15 @@ a message text.
 import ast
 import locale
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from ae.core import stack_variables, try_eval           # type: ignore
+from ae.system import app_name_guess                    # type: ignore
+from ae.paths import Collector                          # type: ignore
+from ae.files import FilesRegister                      # type: ignore
+from ae.inspector import stack_variables, try_eval      # type: ignore
 
 
-__version__ = '0.0.8'
+__version__ = '0.0.9'
 
 
 MsgType = Union[str, Dict[str, str]]                    #: type of message translations within :data:`MSG_FILE_SUFFIX`
@@ -80,38 +83,22 @@ LanguageMessages = Dict[str, MsgType]                   #: type of the data stru
 
 
 MSG_FILE_SUFFIX = 'Msg.txt'                             #: file name containing translated texts of a language/locale
-DEF_LANGUAGE = 'en_US'                                  #: language code of the messages in your app code
+DEF_LANGUAGE = 'en'                                     #: language code of the messages in your app code
 DEF_ENCODING = 'UTF-8'                                  #: encoding of the messages in your app code
 
 _LANG, _ENC = locale.getdefaultlocale()
 if not _LANG:
     _LANG = DEF_LANGUAGE     # pragma: no cover
+elif '_' in _LANG:
+    _LANG = _LANG.split('_')[0]
 if not _ENC:
     _ENC = DEF_ENCODING      # pragma: no cover
 default_locale: List[str] = [_LANG, _ENC]               #: language and encoding code of the current language/locale
 del _LANG, _ENC
 
-locale_paths: List[str] = ['loc', ]                     #: file paths for to search for locale configurations/messages
-installed_languages: List[str] = list()                 #: list of all languages found in the :data:`local_paths`
-loaded_languages: Dict[str, LanguageMessages] = dict()  #: message text translations of all loaded languages
-
-
-def add_paths(*file_paths: str, reset: bool = False):
-    """ add/register new file paths for to search for language and region configurations.
-
-    The list of installed translation languages will automatically be updated.
-
-    :param file_paths:  tuple of locale folder root paths. Each folder path is containing
-                        sub-folders for each supported language/locale. The name of each
-                        sub is the language code of the locale (e.g. es_ES for Spain).
-    :param reset:       pass True for to clear all previously added paths.
-    """
-    global locale_paths
-    if reset:
-        # faster than locale_paths[:] = [] (https://stackoverflow.com/questions/850795/different-ways-of-clearing-lists)
-        locale_paths *= 0
-    locale_paths.extend(file_paths)
-    init_installed_languages()
+COLL_FILES: List[str] = list()                          #: file paths for to search for locale configurations/messages
+INSTALLED_LANGUAGES: List[str] = list()                 #: list of all languages found in the :data:`local_paths`
+LOADED_LANGUAGES: Dict[str, LanguageMessages] = dict()  #: message text translations of all loaded languages
 
 
 def default_language(new_lang: str = '') -> str:
@@ -123,7 +110,7 @@ def default_language(new_lang: str = '') -> str:
     old_lang = default_locale[0]
     if new_lang:
         default_locale[0] = new_lang
-        if new_lang in installed_languages and new_lang not in loaded_languages:
+        if new_lang in INSTALLED_LANGUAGES and new_lang not in LOADED_LANGUAGES:
             load_language_texts(new_lang)
     return old_lang
 
@@ -140,17 +127,53 @@ def default_encoding(new_enc: str = '') -> str:
     return old_enc
 
 
-def init_installed_languages():
-    """ reset and rescan the configured/supported languages found in the currently set :data:`locale_paths`.
-    """
-    global installed_languages
-    installed_languages *= 0
+def init_installed_languages(*file_paths: str, reset: bool = True):
+    """ init/add/register file paths for to search for language and region configurations.
 
-    for path in locale_paths:
-        if os.path.exists(path):
-            installed_languages.extend(
-                dir_entry.name for dir_entry in os.scandir(path)
-                if dir_entry.is_dir() and os.path.exists(os.path.join(dir_entry.path, MSG_FILE_SUFFIX)))
+    The list of installed translation languages will automatically be updated.
+
+    :param file_paths:  optional tuple of additional locale folder root paths. Each folder path is containing
+                        sub-folders for each supported language/locale. The name of each
+                        sub is the language code of the locale (e.g. `en` for english, `es` for spanish, ...).
+    :param reset:       True (==def) for to clear previously added paths and rescan the configured/supported languages.
+    """
+    global INSTALLED_LANGUAGES, COLL_FILES
+
+    # faster than locale_paths[:] = [] (https://stackoverflow.com/questions/850795/different-ways-of-clearing-lists)
+    if reset:
+        INSTALLED_LANGUAGES *= 0
+        prefixes: Tuple[str, ...] = ('{eme}/loc', '{cwd}/loc', '{usr}/loc', )
+    else:
+        prefixes = ()
+    prefixes += file_paths
+    if not prefixes:
+        prefixes = ('{cwd}', )
+
+    coll = Collector(app_name=app_name_guess())
+    coll.collect(*prefixes, select="**/*" + MSG_FILE_SUFFIX, only_first_of='prefix')
+    COLL_FILES = coll.files
+
+    reg_files = FilesRegister()
+    for file in COLL_FILES:
+        reg_files.add_file(file)
+
+    for main_msg_file in reg_files.get(os.path.splitext(MSG_FILE_SUFFIX)[0], ()):
+        INSTALLED_LANGUAGES.append(os.path.basename(os.path.dirname(main_msg_file)))
+
+
+def load_language_file(file_name: str, encoding: str, language: str):
+    """ load file content encoded with the given encoding into the specified language.
+
+    :param file_name:       file name (incl. path and extension to load.
+    :param encoding:        encoding id string.
+    :param language:        language id string.
+    """
+    with open(file_name, encoding=encoding) as file_handle:  # refactor with de.core.file_content into ae.core
+        file_content = file_handle.read()
+    if file_content:
+        lang_messages = ast.literal_eval(file_content)
+        if lang_messages:
+            LOADED_LANGUAGES[language].update(lang_messages)
 
 
 def load_language_texts(language: str, encoding: str = '', domain: str = '', reset: bool = False):
@@ -162,24 +185,24 @@ def load_language_texts(language: str, encoding: str = '', domain: str = '', res
                         then it will be used as prefix for the message file name to be loaded.
     :param reset:       pass True for to clear all previously added language/locale messages.
     """
-    global loaded_languages
+    global LOADED_LANGUAGES
     if reset:
-        loaded_languages.clear()
-    if language not in loaded_languages:
-        loaded_languages[language] = dict()
+        LOADED_LANGUAGES.clear()
+    if language not in LOADED_LANGUAGES:
+        LOADED_LANGUAGES[language] = dict()
     if not encoding:
         encoding = default_locale[1]
 
-    for path in locale_paths:
-        file_name = os.path.join(path, language, f'{domain}{MSG_FILE_SUFFIX}')
-        if not os.path.exists(file_name):
-            continue
-        with open(file_name, encoding=encoding) as file_handle:  # refactor with de.core.file_content into ae.core
-            file_content = file_handle.read()
-        if file_content:
-            lang_messages = ast.literal_eval(file_content)
-            if lang_messages:
-                loaded_languages[language].update(lang_messages)
+    main_file = ""
+    for file_path in COLL_FILES:
+        path, file = os.path.split(file_path)
+        if os.path.basename(path) == language:
+            if file == domain + MSG_FILE_SUFFIX:
+                main_file = file_path
+            else:
+                load_language_file(file_path, encoding, language)
+    if main_file:
+        load_language_file(main_file, encoding, language)
 
 
 def get_text(text: str, count: Optional[int] = None, key_suffix: str = '', language: str = '') -> str:
@@ -273,8 +296,8 @@ def translation(text: str, language: str = '') -> Optional[Union[str, MsgType]]:
     if not language:
         language = default_locale[0]
 
-    if language in loaded_languages:
-        translations = loaded_languages[language]
+    if language in LOADED_LANGUAGES:
+        translations = LOADED_LANGUAGES[language]
         if text in translations:
             return translations[text]
     return None
@@ -282,5 +305,5 @@ def translation(text: str, language: str = '') -> Optional[Union[str, MsgType]]:
 
 # load and set the system/os locale/language/encoding as the app defaults at startup (import)
 init_installed_languages()
-if default_locale[0] in installed_languages:  # pragma: no cover
+if default_locale[0] in INSTALLED_LANGUAGES:  # pragma: no cover
     load_language_texts(default_locale[0], encoding=default_locale[1])

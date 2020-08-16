@@ -5,18 +5,20 @@ import pytest
 
 # noinspection PyProtectedMember
 from ae.i18n import (
-    MSG_FILE_SUFFIX, default_locale, locale_paths, installed_languages, loaded_languages,
-    default_encoding, default_language, add_paths, _, f_, load_language_texts, init_installed_languages)
+    MSG_FILE_SUFFIX, _, f_, COLL_FILES,
+    default_encoding, default_language, default_locale,
+    INSTALLED_LANGUAGES, LOADED_LANGUAGES, load_language_texts, init_installed_languages)
 
 
-test_message_texts = ("test message 1", "test message 2", "pluralize-able")
-pluralize_keys = ('zero', 'one', 'many', 'negative', '')
+test_message_texts = ("test message 1", "test message 2", "pluralize-able", )
+test_message_text2 = ("test message 3", "test message 2", )
+pluralize_keys = ('zero', 'one', 'many', 'negative', '', )
 
 
 @pytest.fixture
 def lang_file_es():
     """ provide test message file for the language es_ES. """
-    lang = 'es_ES'
+    lang = 'es'
     fp = os.path.join('tests', lang)
     os.mkdir(fp)
     fn = os.path.join(fp, MSG_FILE_SUFFIX)
@@ -26,8 +28,19 @@ def lang_file_es():
         file_handle.write(',\n"' + test_message_texts[2] + '": {')
         file_handle.write(', '.join(['"' + t + '": "' + t[:1] + '"' for t in pluralize_keys]) + '}\n')
         file_handle.write('}\n')
+    fn2 = os.path.join(fp, 'additional' + MSG_FILE_SUFFIX)
+    with open(fn2, 'w') as file_handle:
+        file_handle.write('{\n')
+        file_handle.write(f'"{test_message_text2[0]}": "' + 2 * test_message_text2[0] + '",')
+        file_handle.write(f'"{test_message_text2[1]}": "OLD MESSAGE", ')
+        file_handle.write('}\n')
+
     yield lang
-    if os.path.exists(fn):      # check if file exists because some exception/error-check tests need to delete the file
+
+    # check if file exists because some exception/error-check tests need to delete the file
+    if os.path.exists(fn2):
+        os.remove(fn2)
+    if os.path.exists(fn):
         os.remove(fn)
     if os.path.exists(fp):
         os.rmdir(fp)
@@ -45,15 +58,15 @@ class TestDeclarations:
         assert isinstance(default_locale[1], str)
 
     def test_loaded_lang_type(self):
-        assert isinstance(loaded_languages, dict)
+        assert isinstance(LOADED_LANGUAGES, dict)
 
     def test_func_aliases(self):
         assert callable(_)
         assert callable(f_)
 
     def test_installed_languages(self):
-        assert isinstance(installed_languages, list)
-        assert len(installed_languages) == 0
+        assert isinstance(INSTALLED_LANGUAGES, list)
+        assert len(INSTALLED_LANGUAGES) == 0
 
 
 class TestMissingTranslation:
@@ -73,49 +86,50 @@ class TestMissingTranslation:
 
 
 class TestLangLoading:
-    def test_add_paths(self):
-        add_paths('tst')
-        assert 'tst' in locale_paths
-        add_paths('test1', 'test2', reset=True)
-        assert 'tst' not in locale_paths
-        assert 'test1' in locale_paths
-        assert 'test2' in locale_paths
+    def test_missing_languages(self):
+        init_installed_languages('tst', reset=False)
+        assert not COLL_FILES
+        init_installed_languages('test1', 'test2', reset=False)
+        assert not COLL_FILES
+        init_installed_languages('test1', 'test2')
+        assert not COLL_FILES
 
     def test_init_installed_languages(self, lang_file_es):
-        assert not installed_languages
+        assert not INSTALLED_LANGUAGES
         init_installed_languages()
-        assert not installed_languages
+        assert not INSTALLED_LANGUAGES
 
-        add_paths('tests')
-        init_installed_languages()
-        assert installed_languages[0] == lang_file_es
+        init_installed_languages('tests', reset=False)
+        assert INSTALLED_LANGUAGES
+        assert INSTALLED_LANGUAGES[0] == lang_file_es
 
-        assert not loaded_languages
+        init_installed_languages(reset=False)
+        assert not LOADED_LANGUAGES
         assert default_language(lang_file_es) != lang_file_es       # change and load test language
-        assert loaded_languages
+        assert LOADED_LANGUAGES
         assert default_language() == lang_file_es
 
     def test_load_language_texts_str(self, lang_file_es):
-        add_paths('tests')
+        init_installed_languages('tests', reset=False)
         load_language_texts(lang_file_es)
 
-        assert lang_file_es in loaded_languages
-        assert isinstance(loaded_languages[lang_file_es], dict)
-        assert loaded_languages[lang_file_es][test_message_texts[0]] == 't m 1'
-        assert loaded_languages[lang_file_es][test_message_texts[1]] == 't m 2'
+        assert lang_file_es in LOADED_LANGUAGES
+        assert isinstance(LOADED_LANGUAGES[lang_file_es], dict)
+        assert LOADED_LANGUAGES[lang_file_es][test_message_texts[0]] == 't m 1'
+        assert LOADED_LANGUAGES[lang_file_es][test_message_texts[1]] == 't m 2'
 
     def test_load_languages_texts_plural(self, lang_file_es):
-        add_paths('tests')
+        init_installed_languages('tests', reset=False)
         load_language_texts(lang_file_es)                           # test re-load because already loaded by prev test
 
-        assert isinstance(loaded_languages[lang_file_es][test_message_texts[2]], dict)
+        assert isinstance(LOADED_LANGUAGES[lang_file_es][test_message_texts[2]], dict)
         for t in pluralize_keys:
-            assert loaded_languages[lang_file_es][test_message_texts[2]][t] == t[:1]
+            assert LOADED_LANGUAGES[lang_file_es][test_message_texts[2]][t] == t[:1]
 
 
 class TestWithLoadedTranslations:
     def test_get_text(self, lang_file_es):
-        add_paths('tests')
+        init_installed_languages('tests')
         load_language_texts(lang_file_es, reset=True)
 
         assert _("tst_msg") == "tst_msg"
@@ -192,7 +206,7 @@ class TestLocaleSwitch:
         loc_var = 'loc_var_val'
         assert f_("{loc_var}", language=lang_file_es) == loc_var
 
-        add_paths('tests')
+        init_installed_languages('tests', reset=False)
         load_language_texts(lang_file_es)
         default_language(lang_file_es)
         loc_var = 'loc_var_val'
