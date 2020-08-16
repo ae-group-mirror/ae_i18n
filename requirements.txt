@@ -1,2 +1,5 @@
 # dependencies of the i18n portion
-ae_core
+ae_system
+ae_paths
+ae_files
+ae_inspector
