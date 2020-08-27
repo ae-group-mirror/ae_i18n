@@ -65,8 +65,8 @@ More info on the features and usage of this portion are available at
 [ReadTheDocs](https://ae.readthedocs.io/en/latest/_autosummary/ae.i18n.html#module-ae.i18n
 "ae_i18n documentation").
 
-<!-- Common files version 0.0.54 deployed  version 0.0.1 (with 0.0.54)
+<!-- Common files version 0.0.60 deployed version 0.1.9 (with 0.0.60)
      to https://gitlab.com/ae-group as ae_i18n module as well as
      to https://ae-group.gitlab.io with CI check results as well as
-     to https://pypi.org/project as ae-i18n package.
+     to https://pypi.org/project/ae-i18n as namespace portion ae-i18n.
 -->
