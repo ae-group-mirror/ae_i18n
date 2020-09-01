@@ -4,11 +4,11 @@ Internationalization / Localization helpers
 
 On importing this portion it will automatically determine the default locale of
 your operating system and user configuration. Additionally it will check the
-current working directory for a folder with the name `loc` and if it exists
+current working directory for a folder with the name ``loc`` and if it exists
 load the translatable message texts for the determined language accordingly.
 
 For to determine or to change the default language and message text encoding the
-functions :func:default_language` and :func:`default_encoding` are provided
+functions :func:`default_language` and :func:`default_encoding` are provided
 by this portion.
 
 For to specify other locale folders you can use the function :func:`add_paths`,
@@ -16,9 +16,11 @@ which is calling :func:`init_installed_languages` for to prepare the loading
 of additional translations.
 
 In any locale folder have to exist one sub-folder with a name of the
-language code (e.g. 'en_US') for each supported language. In each of these
-sub-folders there have to be a message translation file (named as specified
-by the constant :data:`MSG_FILE_SUFFIX`).
+language code (e.g. 'en' for english) for each supported language.
+
+In each of these sub-folders there have to be at least on message translation
+file with a file name ending in the string specified by the constant
+:data:`MSG_FILE_SUFFIX`).
 
 Additional languages have to be explicitly loaded with the function
 :func:`load_language_texts`.
@@ -46,20 +48,23 @@ function or its short alias :func:`f_`::
 
 Translatable message can also be provided in various pluralization forms.
 For to get a pluralized message you have to pass the :paramref:`~get_text.count`
-keyword argument of :func:`get_text` (or :func:`get_f_string`)::
+keyword argument of :func:`get_text`::
 
     print(_("child", count=1))     # translated into "child" (in english) or e.g. "Kind" in german
-    print(_("child", count=3))     # translated into "children" (in english) or e.g. "Kinder" in german
+    print(_("child", count=3))     # -> "children" (in english) or e.g. "Kinder" (in german)
 
-    print(f_("you have {count] children", count=1))  # -> "you have 1 child" or e.g. "Sie haben 1 Kind"
-    print(f_("you have {count] children", count=3))  # -> "you have 3 children" or e.g. "Sie haben 3 Kinder"
+For pluralized message translated by the :func:`get_f_string` function, the count value have to
+be passed in the `count` item of the :paramref:`~get_f_string.loc_vars`::
+
+    print(f_("you have {count] children", loc_vars=dict(count=1)))  # -> "you have 1 child" or e.g. "Sie haben 1 Kind"
+    print(f_("you have {count] children", loc_vars={'count': 3}))   # -> "you have 3 children" or "Sie haben 3 Kinder"
 
 You can load several languages into your app run-time. For to get the translation for a language
 that is not the current default language you have to pass the :paramref:`~get_text.language` keyword argument
 with the desired language code onto the call of :func:`get_text` (or :func:`get_f_string`)::
 
-    print(_("message", language='es_ES'))   # returns the spanish translation text of "message"
-    print(_("message", language='de_DE'))   # returns the german translation text of "message"
+    print(_("message", language='es'))   # returns the spanish translation text of "message"
+    print(_("message", language='de'))   # returns the german translation text of "message"
 
 The helper function :func:`translation` can be used for to determine if a translation exists for
 a message text.
@@ -75,7 +80,7 @@ from ae.files import FilesRegister                      # type: ignore
 from ae.inspector import stack_variables, try_eval      # type: ignore
 
 
-__version__ = '0.1.9'
+__version__ = '0.1.10'
 
 
 MsgType = Union[str, Dict[str, str]]                    #: type of message translations within :data:`MSG_FILE_SUFFIX`
@@ -228,35 +233,30 @@ def get_text(text: str, count: Optional[int] = None, key_suffix: str = '', langu
 _ = get_text         #: alias of :func:`get_text`.
 
 
-def get_f_string(f_str: str, count: Optional[int] = None, key_suffix: str = '', language: str = '',
+def get_f_string(f_str: str, key_suffix: str = '', language: str = '',
                  glo_vars: Optional[Dict[str, Any]] = None, loc_vars: Optional[Dict[str, Any]] = None
                  ) -> str:
     """ translate passed f-string into a message string of the passed / default language.
 
     :param f_str:       f-string to be translated and evaluated.
-    :param count:       pass if the translated text changes on pluralization (see :func:`get_text`).
-                        If passed then the value of this argument will be provided/overwritten in the
-                        globals as a variable with the name `count`.
     :param key_suffix:  suffix to the key used if the translation is a dict.
     :param language:    language code to load (def=current language code in 1st item of :data:`default_locale`).
     :param glo_vars:    global variables used in the conversion of the f-string expression to a string.
     :param loc_vars:    local variables used in the conversion of the f-string expression to a string.
+                        Pass a numeric value in the `count` item of this dict for pluralized translated texts
+                        (see also :paramref:`~get_text.count` parameter of the function :func:`get_text`).
     :return:            translated text message or the evaluated string result of the expression passed into
-                        :paramref:`~get_text.f_string` if no translation text got found for the current language.
-                        All syntax errors and exceptions occurring in the conversion of the f-string will be
+                        :paramref:`~get_f_string.f_str` if no translation text got found for the current language.
+                        Any syntax errors and exceptions occurring in the conversion of the f-string will be
                         ignored and the original or translated f_string value will be returned in these cases.
     """
+    count = loc_vars.get('count') if isinstance(loc_vars, dict) else None
     f_str = get_text(f_str, count=count, key_suffix=key_suffix, language=language)
 
     ret = ''
     if '{' in f_str and '}' in f_str:  # performance optimization: skip f-string evaluation if no placeholders
         if not glo_vars and not loc_vars:
             glo_vars, loc_vars, _ = stack_variables(max_depth=3)
-
-        if count is not None:
-            if glo_vars is None:
-                glo_vars = dict()
-            glo_vars['count'] = count
 
         ret = try_eval('f"""' + f_str + '"""', ignored_exceptions=(Exception, ), glo_vars=glo_vars, loc_vars=loc_vars)
 

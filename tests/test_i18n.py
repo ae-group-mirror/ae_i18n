@@ -158,16 +158,26 @@ class TestCount:
 
     def test_f_string_locals(self):
         loc_var = 'loc_var_val'
-        assert f_("{loc_var}", count=4) == loc_var
-        assert f_("{loc_var}", count=4, loc_vars=dict(loc_var=loc_var)) == loc_var
+
+        with pytest.raises(TypeError):
+            # noinspection PyArgumentList
+            assert f_("{loc_var}", count=4) == loc_var
+        assert f_("{loc_var}") == loc_var
+        assert f_("{loc_var}", loc_vars=dict(count=4)) == "{loc_var}"
+        assert f_("{loc_var}", loc_vars=dict(loc_var=loc_var, count=4)) == loc_var
 
     def test_f_string_globals(self):
-        assert f_("{glo_var}", count=5) == glo_var
+        with pytest.raises(TypeError):
+            # noinspection PyArgumentList
+            assert f_("{glo_var}", count=5) == glo_var
+        assert f_("{glo_var}") == glo_var
 
     def test_f_string(self):
         loc_var = 'loc_var_val'
+        assert f_("{glo_var}{loc_var}") == glo_var + loc_var
+
         count = 6
-        assert f_("{glo_var}{loc_var}{count}", count=count) == glo_var + loc_var + str(count)
+        assert f_("{glo_var}{loc_var}{count}", glo_vars=globals(), loc_vars=locals()) == glo_var + loc_var + str(count)
 
     def test_get_text_pluralized(self, lang_file_es):
         assert _(test_message_texts[2], count=-1, language=lang_file_es) == 'n'     # negative
@@ -221,13 +231,17 @@ class TestLocaleSwitch:
 
     def test_f_string(self, lang_file_es):
         loc_var = 'loc_var_val'
-        count = 6
+        assert f_("{glo_var}{loc_var}") == glo_var + loc_var
+        assert f_("{glo_var}{loc_var}", language=lang_file_es) == glo_var + loc_var
 
-        assert f_("{glo_var}{loc_var}{count}", count=count) == glo_var + loc_var + str(count)
-        assert f_("{glo_var}{loc_var}{count}", count=count, language=lang_file_es) == glo_var + loc_var + str(count)
+        count = 6
+        assert f_("{glo_var}{loc_var}{count}", glo_vars=globals(), loc_vars=locals()) == glo_var + loc_var + str(count)
+        assert f_("{glo_var}{loc_var}{count}", language=lang_file_es, glo_vars=globals(), loc_vars=locals()) \
+               == glo_var + loc_var + str(count)
 
         default_language(lang_file_es)
-        assert f_("{glo_var}{loc_var}{count}", count=count, language=lang_file_es) == glo_var + loc_var + str(count)
+        assert f_("{glo_var}{loc_var}{count}", language=lang_file_es, glo_vars=globals(), loc_vars=locals()) \
+               == glo_var + loc_var + str(count)
 
     def test_get_text_pluralized(self, lang_file_es):
         default_language(lang_file_es)
