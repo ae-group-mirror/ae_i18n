@@ -80,7 +80,7 @@ from ae.files import FilesRegister                      # type: ignore
 from ae.inspector import stack_variables, try_eval      # type: ignore
 
 
-__version__ = '0.1.10'
+__version__ = '0.1.11'
 
 
 MsgType = Union[str, Dict[str, str]]                    #: type of message translations within :data:`MSG_FILE_SUFFIX`
@@ -242,7 +242,11 @@ def get_f_string(f_str: str, key_suffix: str = '', language: str = '',
     :param key_suffix:  suffix to the key used if the translation is a dict.
     :param language:    language code to load (def=current language code in 1st item of :data:`default_locale`).
     :param glo_vars:    global variables used in the conversion of the f-string expression to a string.
+                        The globals() of the caller of the callee will be available too and get overwritten
+                        by the items of this argument.
     :param loc_vars:    local variables used in the conversion of the f-string expression to a string.
+                        The locals() of the caller of the callee will be available too and get overwritten
+                        by the items of this argument.
                         Pass a numeric value in the `count` item of this dict for pluralized translated texts
                         (see also :paramref:`~get_text.count` parameter of the function :func:`get_text`).
     :return:            translated text message or the evaluated string result of the expression passed into
@@ -255,10 +259,13 @@ def get_f_string(f_str: str, key_suffix: str = '', language: str = '',
 
     ret = ''
     if '{' in f_str and '}' in f_str:  # performance optimization: skip f-string evaluation if no placeholders
-        if not glo_vars and not loc_vars:
-            glo_vars, loc_vars, _ = stack_variables(max_depth=3)
+        g_vars, l_vars, _ = stack_variables(max_depth=3)
+        if glo_vars is not None:
+            g_vars.update(glo_vars)
+        if loc_vars is not None:
+            l_vars.update(loc_vars)
 
-        ret = try_eval('f"""' + f_str + '"""', ignored_exceptions=(Exception, ), glo_vars=glo_vars, loc_vars=loc_vars)
+        ret = try_eval('f"""' + f_str + '"""', ignored_exceptions=(Exception, ), glo_vars=g_vars, loc_vars=l_vars)
 
     return ret or f_str
 

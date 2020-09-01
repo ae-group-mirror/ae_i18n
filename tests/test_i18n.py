@@ -159,17 +159,11 @@ class TestCount:
     def test_f_string_locals(self):
         loc_var = 'loc_var_val'
 
-        with pytest.raises(TypeError):
-            # noinspection PyArgumentList
-            assert f_("{loc_var}", count=4) == loc_var
         assert f_("{loc_var}") == loc_var
-        assert f_("{loc_var}", loc_vars=dict(count=4)) == "{loc_var}"
+        assert f_("{loc_var}", loc_vars=dict(count=4)) == loc_var
         assert f_("{loc_var}", loc_vars=dict(loc_var=loc_var, count=4)) == loc_var
 
     def test_f_string_globals(self):
-        with pytest.raises(TypeError):
-            # noinspection PyArgumentList
-            assert f_("{glo_var}", count=5) == glo_var
         assert f_("{glo_var}") == glo_var
 
     def test_f_string(self):
