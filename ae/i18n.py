@@ -74,13 +74,13 @@ import locale
 import os
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from ae.system import app_name_guess                    # type: ignore
+from ae.base import app_name_guess                      # type: ignore
 from ae.paths import Collector                          # type: ignore
 from ae.files import FilesRegister                      # type: ignore
 from ae.inspector import stack_variables, try_eval      # type: ignore
 
 
-__version__ = '0.1.11'
+__version__ = '0.1.12'
 
 
 MsgType = Union[str, Dict[str, str]]                    #: type of message translations within :data:`MSG_FILE_SUFFIX`
