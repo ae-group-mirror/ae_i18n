@@ -74,13 +74,13 @@ import locale
 import os
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from ae.base import app_name_guess                      # type: ignore
+from ae.base import app_name_guess, file_content        # type: ignore
 from ae.paths import Collector                          # type: ignore
 from ae.files import FilesRegister                      # type: ignore
 from ae.inspector import stack_variables, try_eval      # type: ignore
 
 
-__version__ = '0.1.12'
+__version__ = '0.1.13'
 
 
 MsgType = Union[str, Dict[str, str]]                    #: type of message translations within :data:`MSG_FILE_SUFFIX`
@@ -173,10 +173,9 @@ def load_language_file(file_name: str, encoding: str, language: str):
     :param encoding:        encoding id string.
     :param language:        language id string.
     """
-    with open(file_name, encoding=encoding) as file_handle:  # refactor with de.core.file_content into ae.core
-        file_content = file_handle.read()
-    if file_content:
-        lang_messages = ast.literal_eval(file_content)
+    content = file_content(file_name, encoding=encoding)
+    if content:
+        lang_messages = ast.literal_eval(content)
         if lang_messages:
             LOADED_LANGUAGES[language].update(lang_messages)
 
