@@ -74,13 +74,13 @@ import locale
 import os
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from ae.base import app_name_guess, file_content        # type: ignore
-from ae.paths import Collector                          # type: ignore
-from ae.files import FilesRegister                      # type: ignore
-from ae.inspector import stack_variables, try_eval      # type: ignore
+from ae.base import app_name_guess, file_content, sys_platform                                  # type: ignore
+from ae.paths import Collector                                                                  # type: ignore
+from ae.files import FilesRegister                                                              # type: ignore
+from ae.inspector import stack_variables, try_eval                                              # type: ignore
 
 
-__version__ = '0.1.13'
+__version__ = '0.1.14'
 
 
 MsgType = Union[str, Dict[str, str]]                    #: type of message translations within :data:`MSG_FILE_SUFFIX`
@@ -91,7 +91,17 @@ MSG_FILE_SUFFIX = 'Msg.txt'                             #: file name containing 
 DEF_LANGUAGE = 'en'                                     #: language code of the messages in your app code
 DEF_ENCODING = 'UTF-8'                                  #: encoding of the messages in your app code
 
-_LANG, _ENC = locale.getdefaultlocale()
+
+if sys_platform() == 'android':                                                                     # pragma: no cover
+    from jnius import autoclass                                                                     # type: ignore
+
+    mActivity = autoclass('org.kivy.android.PythonActivity').mActivity
+    # copied from https://github.com/HelloZeroNet/ZeroNet-kivy/blob/master/src/platform_android.py
+    # deprecated since API level 24: _LANG = mActivity.getResources().getConfiguration().locale.toString()
+    _LANG = mActivity.getResources().getConfiguration().getLocales().get(0).toString()
+    _ENC = ''
+else:
+    _LANG, _ENC = locale.getdefaultlocale()  # type: ignore # mypy is not seeing the not _LANG checks (next code line)
 if not _LANG:
     _LANG = DEF_LANGUAGE     # pragma: no cover
 elif '_' in _LANG:
