@@ -5,9 +5,9 @@ import pytest
 
 # noinspection PyProtectedMember
 from ae.i18n import (
-    MSG_FILE_SUFFIX, _, f_, COLL_FILES,
-    default_encoding, default_language, default_locale,
-    INSTALLED_LANGUAGES, LOADED_LANGUAGES, load_language_texts, init_installed_languages)
+    INSTALLED_LANGUAGES, LOADED_TRANSLATIONS, MSG_FILE_SUFFIX, TRANSLATIONS_PATHS,
+    default_encoding, default_language, default_locale, get_text, get_f_string, load_language_texts,
+    register_package_translations, register_translations_path)
 
 
 test_message_texts = ("test message 1", "test message 2", "pluralize-able", )
@@ -19,8 +19,10 @@ pluralize_keys = ('zero', 'one', 'many', 'negative', '', )
 def lang_file_es():
     """ provide test message file for the language es_ES. """
     lang = 'es'
-    fp = os.path.join('tests', lang)
-    os.mkdir(fp)
+
+    fr = os.path.join('tests', 'loc')
+    fp = os.path.join(fr, lang)
+    os.makedirs(fp)
     fn = os.path.join(fp, MSG_FILE_SUFFIX)
     with open(fn, 'w') as file_handle:
         file_handle.write('{\n')
@@ -44,6 +46,8 @@ def lang_file_es():
         os.remove(fn)
     if os.path.exists(fp):
         os.rmdir(fp)
+    if os.path.exists(fr):
+        os.rmdir(fr)
 
 
 glo_var = 'glo_var_val'
@@ -58,11 +62,11 @@ class TestDeclarations:
         assert isinstance(default_locale[1], str)
 
     def test_loaded_lang_type(self):
-        assert isinstance(LOADED_LANGUAGES, dict)
+        assert isinstance(LOADED_TRANSLATIONS, dict)
 
     def test_func_aliases(self):
-        assert callable(_)
-        assert callable(f_)
+        assert callable(get_text)
+        assert callable(get_f_string)
 
     def test_installed_languages(self):
         assert isinstance(INSTALLED_LANGUAGES, list)
@@ -71,181 +75,194 @@ class TestDeclarations:
 
 class TestMissingTranslation:
     def test_get_text(self):
-        assert _("tst_msg") == "tst_msg"
+        assert get_text("tst_msg") == "tst_msg"
 
     def test_f_string_locals(self):
         loc_var = 'loc_var_val'
-        assert f_("{loc_var}") == loc_var
+        assert get_f_string("{loc_var}") == loc_var
 
     def test_f_string_globals(self):
-        assert f_("{glo_var}") == glo_var
+        assert get_f_string("{glo_var}") == glo_var
 
     def test_f_string(self):
         loc_var = 'loc_var_val'
-        assert f_("{glo_var}{loc_var}") == glo_var + loc_var
+        assert get_f_string("{glo_var}{loc_var}") == glo_var + loc_var
 
 
 class TestLangLoading:
     def test_missing_languages(self):
-        init_installed_languages('tst', reset=False)
-        assert not COLL_FILES
-        init_installed_languages('test1', 'test2', reset=False)
-        assert not COLL_FILES
-        init_installed_languages('test1', 'test2')
-        assert not COLL_FILES
+        assert not register_translations_path('tst')
+        assert not TRANSLATIONS_PATHS
 
-    def test_init_installed_languages(self, lang_file_es):
+        assert not register_translations_path('test1')
+        assert not TRANSLATIONS_PATHS
+
+        assert not register_translations_path('test2')
+        assert not TRANSLATIONS_PATHS
+
+    def test_register_translations_path(self, lang_file_es):
         assert not INSTALLED_LANGUAGES
-        init_installed_languages()
+        register_translations_path()
         assert not INSTALLED_LANGUAGES
 
-        init_installed_languages('tests', reset=False)
+        register_translations_path('tests')
         assert INSTALLED_LANGUAGES
         assert INSTALLED_LANGUAGES[0] == lang_file_es
 
-        init_installed_languages(reset=False)
-        assert not LOADED_LANGUAGES
+        register_translations_path()
+        assert not LOADED_TRANSLATIONS
         assert default_language(lang_file_es) != lang_file_es       # change and load test language
-        assert LOADED_LANGUAGES
+        assert LOADED_TRANSLATIONS
         assert default_language() == lang_file_es
 
     def test_load_language_texts_str(self, lang_file_es):
-        init_installed_languages('tests', reset=False)
+        register_translations_path('tests')
         load_language_texts(lang_file_es)
 
-        assert lang_file_es in LOADED_LANGUAGES
-        assert isinstance(LOADED_LANGUAGES[lang_file_es], dict)
-        assert LOADED_LANGUAGES[lang_file_es][test_message_texts[0]] == 't m 1'
-        assert LOADED_LANGUAGES[lang_file_es][test_message_texts[1]] == 't m 2'
+        assert lang_file_es in LOADED_TRANSLATIONS
+        assert isinstance(LOADED_TRANSLATIONS[lang_file_es], dict)
+        assert LOADED_TRANSLATIONS[lang_file_es][test_message_texts[0]] == 't m 1'
+        assert LOADED_TRANSLATIONS[lang_file_es][test_message_texts[1]] == 't m 2'
 
     def test_load_languages_texts_plural(self, lang_file_es):
-        init_installed_languages('tests', reset=False)
+        register_translations_path('tests')
         load_language_texts(lang_file_es)                           # test re-load because already loaded by prev test
 
-        assert isinstance(LOADED_LANGUAGES[lang_file_es][test_message_texts[2]], dict)
+        assert isinstance(LOADED_TRANSLATIONS[lang_file_es][test_message_texts[2]], dict)
         for t in pluralize_keys:
-            assert LOADED_LANGUAGES[lang_file_es][test_message_texts[2]][t] == t[:1]
+            assert LOADED_TRANSLATIONS[lang_file_es][test_message_texts[2]][t] == t[:1]
+
+    def test_get_default_lang(self, lang_file_es):
+        assert load_language_texts()
+
+    def test_register_package_translations(self, lang_file_es):
+        TRANSLATIONS_PATHS.clear()
+        assert not TRANSLATIONS_PATHS
+        register_package_translations()
+        assert TRANSLATIONS_PATHS
 
 
 class TestWithLoadedTranslations:
     def test_get_text(self, lang_file_es):
-        init_installed_languages('tests')
+        assert register_translations_path('tests')
         load_language_texts(lang_file_es, reset=True)
 
-        assert _("tst_msg") == "tst_msg"
-        assert _(test_message_texts[0], language=lang_file_es) == "t m " + test_message_texts[0][-1]
-        assert _(test_message_texts[1], language=lang_file_es) == "t m " + test_message_texts[1][-1]
+        assert get_text("tst_msg") == "tst_msg"
+        assert get_text(test_message_texts[0], language=lang_file_es) == "t m " + test_message_texts[0][-1]
+        assert get_text(test_message_texts[1], language=lang_file_es) == "t m " + test_message_texts[1][-1]
 
     def test_f_string_locals(self):
         loc_var = 'loc_var_val'
-        assert f_("{loc_var}") == loc_var
+        assert get_f_string("{loc_var}") == loc_var
 
     def test_f_string_globals(self):
-        assert f_("{glo_var}") == glo_var
+        assert get_f_string("{glo_var}") == glo_var
 
     def test_f_string(self):
         loc_var = 'loc_var_val'
-        assert f_("{glo_var}{loc_var}") == glo_var + loc_var
+        assert get_f_string("{glo_var}{loc_var}") == glo_var + loc_var
 
     def test_get_text_pluralized(self, lang_file_es):
-        assert _(test_message_texts[2]) == ''
-        assert _(test_message_texts[2], language=lang_file_es) == ''    # any
+        assert get_text(test_message_texts[2]) == ''
+        assert get_text(test_message_texts[2], language=lang_file_es) == ''    # any
 
 
 class TestCount:
     def test_get_text(self):
-        assert _("tst_msg", count=3) == "tst_msg"
+        assert get_text("tst_msg", count=3) == "tst_msg"
 
     def test_f_string_locals(self):
         loc_var = 'loc_var_val'
 
-        assert f_("{loc_var}") == loc_var
-        assert f_("{loc_var}", loc_vars=dict(count=4)) == loc_var
-        assert f_("{loc_var}", loc_vars=dict(loc_var=loc_var, count=4)) == loc_var
+        assert get_f_string("{loc_var}") == loc_var
+        assert get_f_string("{loc_var}", loc_vars=dict(count=4)) == loc_var
+        assert get_f_string("{loc_var}", loc_vars=dict(loc_var=loc_var, count=4)) == loc_var
 
     def test_f_string_globals(self):
-        assert f_("{glo_var}") == glo_var
+        assert get_f_string("{glo_var}") == glo_var
 
     def test_f_string(self):
         loc_var = 'loc_var_val'
-        assert f_("{glo_var}{loc_var}") == glo_var + loc_var
+        assert get_f_string("{glo_var}{loc_var}") == glo_var + loc_var
 
         count = 6
-        assert f_("{glo_var}{loc_var}{count}", glo_vars=globals(), loc_vars=locals()) == glo_var + loc_var + str(count)
+        assert get_f_string("{glo_var}{loc_var}{count}", glo_vars=globals(), loc_vars=locals()) \
+               == glo_var + loc_var + str(count)
 
     def test_get_text_pluralized(self, lang_file_es):
-        assert _(test_message_texts[2], count=-1, language=lang_file_es) == 'n'     # negative
-        assert _(test_message_texts[2], count=0, language=lang_file_es) == "z"      # zero
-        assert _(test_message_texts[2], count=1, language=lang_file_es) == "o"      # one
-        assert _(test_message_texts[2], count=2, language=lang_file_es) == "m"      # many
-        assert _(test_message_texts[2], count=3, language=lang_file_es) == "m"
-        assert _(test_message_texts[2], count=999, language=lang_file_es) == "m"
+        assert get_text(test_message_texts[2], count=-1, language=lang_file_es) == 'n'     # negative
+        assert get_text(test_message_texts[2], count=0, language=lang_file_es) == "z"      # zero
+        assert get_text(test_message_texts[2], count=1, language=lang_file_es) == "o"      # one
+        assert get_text(test_message_texts[2], count=2, language=lang_file_es) == "m"      # many
+        assert get_text(test_message_texts[2], count=3, language=lang_file_es) == "m"
+        assert get_text(test_message_texts[2], count=999, language=lang_file_es) == "m"
 
     def test_get_text_pluralized_without_count(self, lang_file_es):
-        assert _(test_message_texts[2], language=lang_file_es) == ""       # any
+        assert get_text(test_message_texts[2], language=lang_file_es) == ""       # any
 
     def test_f_string_pluralized_without_count(self, lang_file_es):
-        assert f_(test_message_texts[2], language=lang_file_es) == ""      # any
+        assert get_f_string(test_message_texts[2], language=lang_file_es) == ""      # any
 
 
 class TestLocaleSwitch:
     def test_get_text(self, lang_file_es):
         # already added: add_paths('tests')
-        assert _("tst_msg") == "tst_msg"
-        assert _("tst_msg", language=lang_file_es) == "tst_msg"
-        assert _("tst_msg", language='not_loaded_lang_code') == "tst_msg"
+        assert get_text("tst_msg") == "tst_msg"
+        assert get_text("tst_msg", language=lang_file_es) == "tst_msg"
+        assert get_text("tst_msg", language='not_loaded_lang_code') == "tst_msg"
 
-        assert _(test_message_texts[0], language=lang_file_es) == "t m " + test_message_texts[0][-1]
-        assert _(test_message_texts[0], language='not_loaded_lang_code') == test_message_texts[0]
+        assert get_text(test_message_texts[0], language=lang_file_es) == "t m " + test_message_texts[0][-1]
+        assert get_text(test_message_texts[0], language='not_loaded_lang_code') == test_message_texts[0]
 
-        assert _("tst_msg") == "tst_msg"
-        assert _("tst_msg", language=lang_file_es) == "tst_msg"
-        assert _("tst_msg", language='not_loaded_lang_code') == "tst_msg"
+        assert get_text("tst_msg") == "tst_msg"
+        assert get_text("tst_msg", language=lang_file_es) == "tst_msg"
+        assert get_text("tst_msg", language='not_loaded_lang_code') == "tst_msg"
 
-        assert _(test_message_texts[0]) == "t m " + test_message_texts[0][-1]
-        assert _(test_message_texts[0], language=lang_file_es) == "t m " + test_message_texts[0][-1]
-        assert _(test_message_texts[0], language='not_loaded_lang_code') == test_message_texts[0]
+        assert get_text(test_message_texts[0]) == "t m " + test_message_texts[0][-1]
+        assert get_text(test_message_texts[0], language=lang_file_es) == "t m " + test_message_texts[0][-1]
+        assert get_text(test_message_texts[0], language='not_loaded_lang_code') == test_message_texts[0]
 
     def test_f_string_locals(self, lang_file_es):
         loc_var = 'loc_var_val'
-        assert f_("{loc_var}", language=lang_file_es) == loc_var
+        assert get_f_string("{loc_var}", language=lang_file_es) == loc_var
 
-        init_installed_languages('tests', reset=False)
+        register_translations_path('tests')
         load_language_texts(lang_file_es)
         default_language(lang_file_es)
         loc_var = 'loc_var_val'
-        assert f_("{loc_var}", language=lang_file_es) == loc_var
+        assert get_f_string("{loc_var}", language=lang_file_es) == loc_var
 
-    def test_f_string_globals(self):
-        assert f_("{glo_var}") == glo_var
-        assert f_("{glo_var}", language=lang_file_es) == glo_var
+    def test_f_string_globals(self, lang_file_es):
+        assert get_f_string("{glo_var}") == glo_var
+        assert get_f_string("{glo_var}", language=lang_file_es) == glo_var
 
         default_language(lang_file_es)
-        assert f_("{glo_var}") == glo_var
+        assert get_f_string("{glo_var}") == glo_var
 
     def test_f_string(self, lang_file_es):
         loc_var = 'loc_var_val'
-        assert f_("{glo_var}{loc_var}") == glo_var + loc_var
-        assert f_("{glo_var}{loc_var}", language=lang_file_es) == glo_var + loc_var
+        assert get_f_string("{glo_var}{loc_var}") == glo_var + loc_var
+        assert get_f_string("{glo_var}{loc_var}", language=lang_file_es) == glo_var + loc_var
 
         count = 6
-        assert f_("{glo_var}{loc_var}{count}", glo_vars=globals(), loc_vars=locals()) == glo_var + loc_var + str(count)
-        assert f_("{glo_var}{loc_var}{count}", language=lang_file_es, glo_vars=globals(), loc_vars=locals()) \
+        assert get_f_string("{glo_var}{loc_var}{count}", glo_vars=globals(), loc_vars=locals()) \
+               == glo_var + loc_var + str(count)
+        assert get_f_string("{glo_var}{loc_var}{count}", language=lang_file_es, glo_vars=globals(), loc_vars=locals()) \
                == glo_var + loc_var + str(count)
 
         default_language(lang_file_es)
-        assert f_("{glo_var}{loc_var}{count}", language=lang_file_es, glo_vars=globals(), loc_vars=locals()) \
+        assert get_f_string("{glo_var}{loc_var}{count}", language=lang_file_es, glo_vars=globals(), loc_vars=locals()) \
                == glo_var + loc_var + str(count)
 
     def test_get_text_pluralized(self, lang_file_es):
         default_language(lang_file_es)
-        assert _(test_message_texts[2]) == ""               # any
-        assert _(test_message_texts[2], count=-1) == "n"    # negative
-        assert _(test_message_texts[2], count=0) == "z"     # zero
-        assert _(test_message_texts[2], count=1) == "o"     # one
-        assert _(test_message_texts[2], count=2) == "m"     # many
-        assert _(test_message_texts[2], count=3) == "m"
-        assert _(test_message_texts[2], count=999) == "m"
+        assert get_text(test_message_texts[2]) == ""               # any
+        assert get_text(test_message_texts[2], count=-1) == "n"    # negative
+        assert get_text(test_message_texts[2], count=0) == "z"     # zero
+        assert get_text(test_message_texts[2], count=1) == "o"     # one
+        assert get_text(test_message_texts[2], count=2) == "m"     # many
+        assert get_text(test_message_texts[2], count=3) == "m"
+        assert get_text(test_message_texts[2], count=999) == "m"
 
     def test_default_encoding(self):
         old_enc = default_encoding()
