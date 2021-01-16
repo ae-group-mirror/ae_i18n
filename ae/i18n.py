@@ -82,7 +82,7 @@ from ae.paths import norm_path, Collector                                       
 from ae.inspector import stack_var, stack_vars, try_eval                        # type: ignore
 
 
-__version__ = '0.1.16'
+__version__ = '0.1.17'
 
 
 MsgType = Union[str, Dict[str, str]]                        #: type of message literals in translation text files
@@ -270,9 +270,14 @@ def plural_key(count: Optional[int]) -> str:
     return key
 
 
-def register_package_translations():
-    """ call from module scope of the package for to register/add translations resources path. """
-    package_path = os.path.abspath(os.path.dirname(stack_var('__file__')))
+def register_package_translations(*skip_modules: str):
+    """ call from module scope of the package for to register/add translations resources path.
+
+    :param skip_modules:        list of packages/modules/portions to skip (pass at least `'ae.inspector'` for to
+                                disable the default skip modules, e.g. if you want to register resources provided by a
+                                ae namespace portion that gets by default skipped).
+    """
+    package_path = os.path.abspath(os.path.dirname(stack_var('__file__', *skip_modules)))
     register_translations_path(package_path)
 
 
