@@ -141,6 +141,14 @@ class TestLangLoading:
         register_package_translations()
         assert TRANSLATIONS_PATHS
 
+    def test_register_package_translations_missing(self):
+        TRANSLATIONS_PATHS.clear()
+        assert not TRANSLATIONS_PATHS
+        register_package_translations()
+        assert not TRANSLATIONS_PATHS
+        register_package_translations("do_not_skip_any_module")
+        assert not TRANSLATIONS_PATHS
+
 
 class TestWithLoadedTranslations:
     def test_get_text(self, lang_file_es):
