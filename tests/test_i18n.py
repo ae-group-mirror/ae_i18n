@@ -146,8 +146,6 @@ class TestLangLoading:
         assert not TRANSLATIONS_PATHS
         register_package_translations()
         assert not TRANSLATIONS_PATHS
-        register_package_translations("do_not_skip_any_module")
-        assert not TRANSLATIONS_PATHS
 
 
 class TestWithLoadedTranslations:

@@ -6,18 +6,22 @@ On importing this portion it will automatically determine the default locale (la
 system and user configuration.
 
 The functions :func:`default_language` and :func:`default_encoding` - provided by this portion - are determining or
-changing the default language and message text encoding.
+changing the default language and translation texts encoding.
 
 Additional languages will be automatically loaded by the function :func:`load_language_texts`.
 
 
-locale paths
-------------
+translation texts locale paths
+------------------------------
 
 Locale paths can be provided by your app as well as any python package and namespace portion. By default they are
-situated in a sub-folder with the name `loc` underneath of your app/package root folder. For to add them simply
-call the function :func:`register_package_translations`, which is also used by some ae namespace portions (e.g.
-:mod:`ae.kivy_user_prefs`) for to include package/module specific translation messages.
+situated in a sub-folder with the name `loc` underneath of your app/package root folder. For to add them for a package
+simply call the function :func:`register_package_translations`, which is also used by some ae namespace portions (e.g.
+:mod:`ae.gui_help`) for to include package/module specific translation messages.
+
+.. hint::
+    The :meth:`~ae.gui_app.on_app_build` app event is used by :mod:`~ae.gui_help` for to load the app-specific
+    translation texts on app startup.
 
 For to specify additional locale folders you can use the function :func:`register_translations_path`.
 
@@ -82,20 +86,23 @@ from ae.paths import norm_path, Collector                                       
 from ae.inspector import stack_var, stack_vars, try_eval                        # type: ignore
 
 
-__version__ = '0.1.18'
+__version__ = '0.1.19'
 
 
 MsgType = Union[str, Dict[str, str]]                        #: type of message literals in translation text files
 LanguageMessages = Dict[str, MsgType]                       #: type of the data structure storing the loaded messages
 
 
-MSG_FILE_SUFFIX = 'Msg.txt'                                 #: name suffix of translation text files
-DEF_LANGUAGE = 'en'                                         #: language code of the messages in your app code
 DEF_ENCODING = 'UTF-8'                                      #: encoding of the messages in your app code
+DEF_LANGUAGE = 'en'                                         #: language code of the messages in your app code
 
 INSTALLED_LANGUAGES: List[str] = list()                     # list of language codes found in :data:`TRANSLATIONS_PATHS`
-TRANSLATIONS_PATHS: List[str] = list()                      #: file paths for to search for translations
+
 LOADED_TRANSLATIONS: Dict[str, LanguageMessages] = dict()   #: message text translations of all loaded languages
+
+MSG_FILE_SUFFIX = 'Msg.txt'                                 #: name suffix of translation text files
+
+TRANSLATIONS_PATHS: List[str] = list()                      #: file paths for to search for translations
 
 
 if os_platform == 'android':                                                                        # pragma: no cover
@@ -118,6 +125,18 @@ default_locale: List[str] = [_LANG, _ENC]                   #: language and enco
 del _LANG, _ENC
 
 
+def default_encoding(new_enc: str = '') -> str:
+    """ get and optionally set the default message text encoding.
+
+    :param new_enc:             new default encoding to be set. Kept unchanged if not passed.
+    :return:                    old default encoding (current if :paramref:`~default_encoding.new_enc` get not passed).
+    """
+    old_enc = default_locale[1]
+    if new_enc:
+        default_locale[1] = new_enc
+    return old_enc
+
+
 def default_language(new_lang: str = '') -> str:
     """ get and optionally set the default language code.
 
@@ -131,65 +150,6 @@ def default_language(new_lang: str = '') -> str:
         if new_lang not in LOADED_TRANSLATIONS:
             load_language_texts(new_lang)
     return old_lang
-
-
-def default_encoding(new_enc: str = '') -> str:
-    """ get and optionally set the default message text encoding.
-
-    :param new_enc:             new default encoding to be set. Kept unchanged if not passed.
-    :return:                    old default encoding (current if :paramref:`~default_encoding.new_enc` get not passed).
-    """
-    old_enc = default_locale[1]
-    if new_enc:
-        default_locale[1] = new_enc
-    return old_enc
-
-
-def load_language_file(file_name: str, encoding: str, language: str):
-    """ load file content encoded with the given encoding into the specified language.
-
-    :param file_name:           file name (incl. path and extension to load.
-    :param encoding:            encoding id string.
-    :param language:            language id string.
-    """
-    content = file_content(file_name, encoding=encoding)
-    if content:
-        lang_messages = ast.literal_eval(content)
-        if lang_messages:
-            if language not in LOADED_TRANSLATIONS:
-                LOADED_TRANSLATIONS[language] = dict()
-            LOADED_TRANSLATIONS[language].update(lang_messages)
-
-
-def load_language_texts(language: str = '', encoding: str = '', domain: str = '', reset: bool = False) -> str:
-    """ load translation texts for the given language and optional domain.
-
-    :param language:            language code of the translation texts to load. If not passed then use the default
-                                language.
-    :param encoding:            encoding to use for to load message file.
-    :param domain:              optional domain id, e.g. the id of an app, attached process or a user. if passed
-                                then it will be used as prefix for the message file name to be loaded.
-    :param reset:               pass True for to clear all previously added language/locale messages.
-    :return:                    language code of the loaded/default language.
-    """
-    global LOADED_TRANSLATIONS
-
-    if not language:
-        language = default_language()
-    if not encoding:
-        encoding = default_locale[1]
-    if reset:
-        LOADED_TRANSLATIONS.clear()
-
-    for root_path in TRANSLATIONS_PATHS:
-        file_path = os.path.join(root_path, language, MSG_FILE_SUFFIX)
-        if os.path.exists(file_path):
-            load_language_file(file_path, encoding, language)
-        file_path = os.path.join(root_path, language, domain + MSG_FILE_SUFFIX)
-        if os.path.exists(file_path):
-            load_language_file(file_path, encoding, language)
-
-    return language
 
 
 def get_text(text: str, count: Optional[int] = None, key_suffix: str = '', language: str = '') -> str:
@@ -250,6 +210,54 @@ def get_f_string(f_str: str, key_suffix: str = '', language: str = '',
     return ret or f_str
 
 
+def load_language_file(file_name: str, encoding: str, language: str):
+    """ load file content encoded with the given encoding into the specified language.
+
+    :param file_name:           file name (incl. path and extension to load.
+    :param encoding:            encoding id string.
+    :param language:            language id string.
+    """
+    content = file_content(file_name, encoding=encoding)
+    if content:
+        lang_messages = ast.literal_eval(content)
+        if lang_messages:
+            if language not in LOADED_TRANSLATIONS:
+                LOADED_TRANSLATIONS[language] = dict()
+            LOADED_TRANSLATIONS[language].update(lang_messages)
+
+
+def load_language_texts(language: str = '', encoding: str = '', domain: str = '', reset: bool = False) -> str:
+    """ load translation texts for the given language and optional domain.
+
+    :param language:            language code of the translation texts to load. If not passed then use the default
+                                language.
+    :param encoding:            encoding to use for to load message file.
+    :param domain:              optional domain id, e.g. the id of an app, attached process or a user. if passed
+                                then it will be used as prefix for the message file name to be loaded additionally and
+                                after the default translation texts get loaded (overwriting the default translations).
+    :param reset:               pass True for to clear all previously added language/locale messages.
+    :return:                    language code of the loaded/default language.
+    """
+    global LOADED_TRANSLATIONS
+
+    if not language:
+        language = default_language()
+    if not encoding:
+        encoding = default_locale[1]
+    if reset:
+        LOADED_TRANSLATIONS.clear()
+
+    for root_path in TRANSLATIONS_PATHS:
+        file_path = os.path.join(root_path, language, MSG_FILE_SUFFIX)
+        if os.path.exists(file_path):
+            load_language_file(file_path, encoding, language)
+        file_path = os.path.join(root_path, language, domain + MSG_FILE_SUFFIX)
+        if os.path.exists(file_path):
+            load_language_file(file_path, encoding, language)
+
+    return language
+
+
 def plural_key(count: Optional[int]) -> str:
     """ convert number in count into a dict key for to access the correct plural form.
 
@@ -270,22 +278,24 @@ def plural_key(count: Optional[int]) -> str:
     return key
 
 
-def register_package_translations(*skip_modules: str):
+def register_package_translations():
     """ call from module scope of the package for to register/add translations resources path.
 
-    :param skip_modules:        list of packages/modules/portions to skip in the search of the __file__ module variable
-                                in the call stack. Only needed for ae portions that are providing resources and are
-                                listed in the :data:`~ae.inspector.SKIPPED_MODULES`, like e.g. ae.gui_app and
-                                ae.gui_help (passing empty string '' for to overwrite default skip list).
+    No parameters needed because we use here :func:`~ae.inspector.stack_var` helper function for to determine the
+    the module file path via the `__file__` module variable of the caller module in the call stack. In this call
+    we have to overwrite the default value (:data:`~ae.inspector.SKIPPED_MODULES`) of the
+    :paramref:`~ae.inspector.stack_var.skip_modules` parameter for to not skip ae portions that are providing
+    package resources and are listed in the :data:`~ae.inspector.SKIPPED_MODULES`, like e.g. :mod:`ae.gui_app` and
+    :mod:`ae.gui_help` (passing empty string '' for to overwrite default skip list).
     """
-    package_path = os.path.abspath(os.path.dirname(stack_var('__file__', *skip_modules)))
+    package_path = os.path.abspath(os.path.dirname(stack_var('__file__', '')))
     register_translations_path(package_path)
 
 
 def register_translations_path(translation_path: str = "") -> bool:
     """ add/register the passed root path as new resource of translation texts.
 
-    :param translation_path:    new root path of a translations folder structure.
+    :param translation_path:    root path of a translations folder structure to register, using cwd if not specified.
     :return:                    True if the translation folder structure exists and got properly added/registered,
                                 else False.
     """
