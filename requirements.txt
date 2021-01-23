@@ -1,6 +1,6 @@
 # dependencies of the i18n portion
 # pyjnius/jnius only needed on android
 ae_base
-ae_paths
 ae_files
+ae_paths
 ae_inspector

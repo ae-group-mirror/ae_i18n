@@ -81,12 +81,13 @@ import locale
 import os
 from typing import Any, Dict, List, Optional, Union
 
-from ae.base import file_content, os_platform                                   # type: ignore
+from ae.base import os_platform                                                 # type: ignore
+from ae.files import read_file_text                                             # type: ignore
 from ae.paths import norm_path, Collector                                       # type: ignore
 from ae.inspector import stack_var, stack_vars, try_eval                        # type: ignore
 
 
-__version__ = '0.1.19'
+__version__ = '0.1.20'
 
 
 MsgType = Union[str, Dict[str, str]]                        #: type of message literals in translation text files
@@ -217,7 +218,7 @@ def load_language_file(file_name: str, encoding: str, language: str):
     :param encoding:            encoding id string.
     :param language:            language id string.
     """
-    content = file_content(file_name, encoding=encoding)
+    content = read_file_text(file_name, encoding=encoding)
     if content:
         lang_messages = ast.literal_eval(content)
         if lang_messages:
