@@ -87,7 +87,7 @@ from ae.paths import norm_path, Collector                                       
 from ae.inspector import stack_var, stack_vars, try_eval                        # type: ignore
 
 
-__version__ = '0.1.20'
+__version__ = '0.1.21'
 
 
 MsgType = Union[str, Dict[str, str]]                        #: type of message literals in translation text files
@@ -110,9 +110,16 @@ if os_platform == 'android':                                                    
     from jnius import autoclass                                                                     # type: ignore
 
     mActivity = autoclass('org.kivy.android.PythonActivity').mActivity
-    # copied from https://github.com/HelloZeroNet/ZeroNet-kivy/blob/master/src/platform_android.py
-    # deprecated since API level 24: _LANG = mActivity.getResources().getConfiguration().locale.toString()
-    _LANG = mActivity.getResources().getConfiguration().getLocales().get(0).toString()
+    # noinspection PyBroadException
+    try:
+        # copied from https://github.com/HelloZeroNet/ZeroNet-kivy/blob/master/src/platform_android.py
+        _LANG = mActivity.getResources().getConfiguration().locale.toString()   # deprecated since API level 24
+    except Exception:
+        # noinspection PyBroadException
+        try:
+            _LANG = mActivity.getResources().getConfiguration().getLocales().get(0).toString()
+        except Exception:
+            _LANG = ''
     _ENC = ''
 else:
     _LANG, _ENC = locale.getdefaultlocale()  # type: ignore # mypy is not seeing the not _LANG checks (next code line)
