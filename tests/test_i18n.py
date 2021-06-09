@@ -1,7 +1,9 @@
 """ ae.i18n unit tests. """
 import os
-
 import pytest
+
+#from de.core import TESTS_FOLDER
+TESTS_FOLDER = 'tests'
 
 # noinspection PyProtectedMember
 from ae.i18n import (
@@ -20,7 +22,7 @@ def lang_file_es():
     """ provide test message file for the language es_ES. """
     lang = 'es'
 
-    fr = os.path.join('tests', 'loc')
+    fr = os.path.join(TESTS_FOLDER, 'loc')
     fp = os.path.join(fr, lang)
     os.makedirs(fp)
     fn = os.path.join(fp, MSG_FILE_SUFFIX)
@@ -105,7 +107,7 @@ class TestLangLoading:
         register_translations_path()
         assert not INSTALLED_LANGUAGES
 
-        register_translations_path('tests')
+        register_translations_path(TESTS_FOLDER)
         assert INSTALLED_LANGUAGES
         assert INSTALLED_LANGUAGES[0] == lang_file_es
 
@@ -116,7 +118,7 @@ class TestLangLoading:
         assert default_language() == lang_file_es
 
     def test_load_language_texts_str(self, lang_file_es):
-        register_translations_path('tests')
+        register_translations_path(TESTS_FOLDER)
         load_language_texts(lang_file_es)
 
         assert lang_file_es in LOADED_TRANSLATIONS
@@ -125,7 +127,7 @@ class TestLangLoading:
         assert LOADED_TRANSLATIONS[lang_file_es][test_message_texts[1]] == 't m 2'
 
     def test_load_languages_texts_plural(self, lang_file_es):
-        register_translations_path('tests')
+        register_translations_path(TESTS_FOLDER)
         load_language_texts(lang_file_es)                           # test re-load because already loaded by prev test
 
         assert isinstance(LOADED_TRANSLATIONS[lang_file_es][test_message_texts[2]], dict)
@@ -150,7 +152,7 @@ class TestLangLoading:
 
 class TestWithLoadedTranslations:
     def test_get_text(self, lang_file_es):
-        assert register_translations_path('tests')
+        assert register_translations_path(TESTS_FOLDER)
         load_language_texts(lang_file_es, reset=True)
 
         assert get_text("tst_msg") == "tst_msg"
@@ -212,7 +214,7 @@ class TestCount:
 
 class TestLocaleSwitch:
     def test_get_text(self, lang_file_es):
-        # already added: add_paths('tests')
+        # already added: add_paths(TESTS_FOLDER)
         assert get_text("tst_msg") == "tst_msg"
         assert get_text("tst_msg", language=lang_file_es) == "tst_msg"
         assert get_text("tst_msg", language='not_loaded_lang_code') == "tst_msg"
@@ -232,7 +234,7 @@ class TestLocaleSwitch:
         loc_var = 'loc_var_val'
         assert get_f_string("{loc_var}", language=lang_file_es) == loc_var
 
-        register_translations_path('tests')
+        register_translations_path(TESTS_FOLDER)
         load_language_texts(lang_file_es)
         default_language(lang_file_es)
         loc_var = 'loc_var_val'
