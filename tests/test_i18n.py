@@ -2,7 +2,7 @@
 import os
 import pytest
 
-from de.core import TESTS_FOLDER
+from ae.base import TESTS_FOLDER
 
 # noinspection PyProtectedMember
 from ae.i18n import (

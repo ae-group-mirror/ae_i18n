@@ -83,13 +83,13 @@ import locale
 import os
 from typing import Any, Dict, List, Optional, Union
 
-from ae.base import os_platform                                                 # type: ignore
-from ae.files import read_file_text                                             # type: ignore
-from ae.paths import norm_path, Collector                                       # type: ignore
-from ae.inspector import stack_var, stack_vars, try_eval                        # type: ignore
+from ae.base import norm_path, os_platform                                                  # type: ignore
+from ae.files import read_file_text                                                         # type: ignore
+from ae.paths import Collector, normalize                                                   # type: ignore
+from ae.inspector import stack_var, stack_vars, try_eval                                    # type: ignore
 
 
-__version__ = '0.2.23'
+__version__ = '0.2.24'
 
 
 MsgType = Union[str, Dict[str, str]]                        #: type of message literals in translation text files
@@ -99,13 +99,13 @@ LanguageMessages = Dict[str, MsgType]                       #: type of the data 
 DEF_ENCODING = 'UTF-8'                                      #: encoding of the messages in your app code
 DEF_LANGUAGE = 'en'                                         #: language code of the messages in your app code
 
-INSTALLED_LANGUAGES: List[str] = list()                     # list of language codes found in :data:`TRANSLATIONS_PATHS`
+INSTALLED_LANGUAGES: List[str] = []                         # list of language codes found in :data:`TRANSLATIONS_PATHS`
 
-LOADED_TRANSLATIONS: Dict[str, LanguageMessages] = dict()   #: message text translations of all loaded languages
+LOADED_TRANSLATIONS: Dict[str, LanguageMessages] = {}       #: message text translations of all loaded languages
 
 MSG_FILE_SUFFIX = 'Msg.txt'                                 #: name suffix of translation text files
 
-TRANSLATIONS_PATHS: List[str] = list()                      #: file paths to search for translations
+TRANSLATIONS_PATHS: List[str] = []                          #: file paths to search for translations
 
 
 if os_platform == 'android':                                                                        # pragma: no cover
@@ -230,7 +230,7 @@ def load_language_file(file_name: str, encoding: str, language: str):
         lang_messages = ast.literal_eval(content)
         if lang_messages:
             if language not in LOADED_TRANSLATIONS:
-                LOADED_TRANSLATIONS[language] = dict()
+                LOADED_TRANSLATIONS[language] = {}
             LOADED_TRANSLATIONS[language].update(lang_messages)
 
 
@@ -295,7 +295,7 @@ def register_package_translations():
     package resources and are listed in the :data:`~ae.inspector.SKIPPED_MODULES`, like e.g. :mod:`ae.gui_app` and
     :mod:`ae.gui_help` (passing empty string '' to overwrite default skip list).
     """
-    package_path = os.path.abspath(os.path.dirname(stack_var('__file__', '')))
+    package_path = os.path.dirname(norm_path(stack_var('__file__', '')))
     register_translations_path(package_path)
 
 
@@ -308,7 +308,7 @@ def register_translations_path(translation_path: str = "") -> bool:
     """
     global INSTALLED_LANGUAGES, TRANSLATIONS_PATHS
 
-    translation_path = norm_path(os.path.join(translation_path, 'loc'))
+    translation_path = normalize(os.path.join(translation_path, 'loc'))
     if not os.path.exists(translation_path):
         return False
 
