@@ -89,7 +89,7 @@ from ae.paths import Collector, normalize                                       
 from ae.inspector import stack_var, stack_vars, try_eval                                    # type: ignore
 
 
-__version__ = '0.2.24'
+__version__ = '0.3.24'
 
 
 MsgType = Union[str, Dict[str, str]]                        #: type of message literals in translation text files
