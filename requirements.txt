@@ -3,4 +3,4 @@
 ae_base
 ae_files
 ae_paths
-ae_inspector
+ae_dynamicod

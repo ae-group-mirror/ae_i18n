@@ -83,13 +83,13 @@ import locale
 import os
 from typing import Any, Dict, List, Optional, Union
 
-from ae.base import norm_path, os_platform                                                  # type: ignore
+from ae.base import norm_path, os_platform, stack_var, stack_vars                           # type: ignore
 from ae.files import read_file_text                                                         # type: ignore
 from ae.paths import Collector, normalize                                                   # type: ignore
-from ae.inspector import stack_var, stack_vars, try_eval                                    # type: ignore
+from ae.dynamicod import try_eval                                                           # type: ignore
 
 
-__version__ = '0.3.24'
+__version__ = '0.3.25'
 
 
 MsgType = Union[str, Dict[str, str]]                        #: type of message literals in translation text files
@@ -288,11 +288,11 @@ def plural_key(count: Optional[int]) -> str:
 def register_package_translations():
     """ call from module scope of the package to register/add translations resources path.
 
-    no parameters needed because we use here :func:`~ae.inspector.stack_var` helper function to determine the
+    no parameters needed because we use here :func:`~ae.base.stack_var` helper function to determine the
     the module file path via the `__file__` module variable of the caller module in the call stack. in this call
-    we have to overwrite the default value (:data:`~ae.inspector.SKIPPED_MODULES`) of the
-    :paramref:`~ae.inspector.stack_var.skip_modules` parameter to not skip ae portions that are providing
-    package resources and are listed in the :data:`~ae.inspector.SKIPPED_MODULES`, like e.g. :mod:`ae.gui_app` and
+    we have to overwrite the default value (:data:`~ae.base.SKIPPED_MODULES`) of the
+    :paramref:`~ae.base.stack_var.skip_modules` parameter to not skip ae portions that are providing
+    package resources and are listed in the :data:`~ae.base.SKIPPED_MODULES`, like e.g. :mod:`ae.gui_app` and
     :mod:`ae.gui_help` (passing empty string '' to overwrite default skip list).
     """
     package_path = os.path.dirname(norm_path(stack_var('__file__', '')))
