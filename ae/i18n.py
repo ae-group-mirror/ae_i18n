@@ -75,7 +75,7 @@ onto the call of :func:`get_text` (or :func:`get_f_string`)::
 the helper function :func:`translation` can be used to determine if a translation exists for a message text.
 
 .. hint::
-    the ae portion :mod:`ae.kivy_app` is implementing translation messages for kv files and provides additional
+    the ae portion :mod:`ae.kivy.i18n` is implementing translation messages for kv files and provides additional
     helper functions and methods.
 """
 import ast
@@ -89,7 +89,7 @@ from ae.paths import Collector, normalize                                       
 from ae.dynamicod import try_eval                                                           # type: ignore
 
 
-__version__ = '0.3.26'
+__version__ = '0.3.27'
 
 
 MsgType = Union[str, Dict[str, str]]                        #: type of message literals in translation text files
