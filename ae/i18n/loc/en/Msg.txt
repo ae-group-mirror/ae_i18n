@@ -1,0 +1,218 @@
+{
+"": """\
+[b]interactive help mode[/b]
+
+screen elements got just disabled.
+
+1st tap on marked screen parts
+    shows a specific help text.
+
+2nd tap at same screen part will
+    be processed as normal.
+
+to exit the help mode tap again
+on the question mark icon ([b]?[/b]).""",
+#----------------------------------
+'help_app_state#font_size': """\
+adjust font size
+
+current size: [b]{round(self.value)}[/b]px""",
+#----------------------------------
+'help_app_state#pending_requests_frequency': """\
+frequency to update/poll
+pending requests and
+animations.
+
+current frequency: [b]{round(self.value, 1)}[/b]Hz""",
+#----------------------------------
+'help_app_state#sound_volume': """\
+change sound volume
+
+tap all to the left
+to mute all sounds.
+
+current volume: [b]{round(self.value * 100)}%[/b]""",
+#==================================
+'help_app_state#vibration_volume': """\
+vibration intensity
+
+tap all to the left
+to mute all vibrations.
+
+current vibration: [b]{round(self.value * 100)}[/b]%""",
+#==================================
+'help_flow#change_file_chooser_path': """\
+display the content
+of this folder""",
+#----------------------------------
+'help_flow#change_lang_code': """\
+change default language to
+[b]'{main_app.get_txt_(self.lang_code)}'[/b].""",
+#----------------------------------
+'help_flow#change_light_theme': """\
+switch app between [b]light[/b]
+and [b]dark[/b] theme.""",
+#----------------------------------
+"help_flow#close_popup": """\
+tap to close
+this popup""",
+#----------------------------------
+'help_flow#open_color_editor':
+    {'': """\
+open color editor to change
+the [b]{self.color_name.replace('_', ' ')}[/b].""",
+    'after': """\
+double tap at color circle or
+use the sliders to change the
+[b]{self.color_name.replace('_', ' ')}[/b].
+
+tapping again at the opening
+button will close the color
+editor.""", },
+#----------------------------------
+'help_flow#open_iterable_displayer':
+    {'': "show details",
+     'next_help_id': 'help_flow#close_popup', },
+#----------------------------------
+'help_flow#open_user_preferences':
+    {'': """\
+opening the user preferences
+drop down menu.""",
+    'after': """\
+in this drop down menu you can
+change e.g. the theme (dark or
+light), the preferred font
+size or the colors.
+
+tap on the available menu
+options to display more
+detailed help texts.""", },
+#----------------------------------
+'help_flow#select_file_chooser_path': """\
+opening the
+folder-quick-
+select-dropdown""",
+#----------------------------------
+'help_flow#toggle_file_chooser_view': """\
+toggles between list
+and icon view.
+
+tapping would switch to
+[b]{'list' if self.state == 'down' else 'icon'} view[/b]""",
+#==================================
+'tour_page#':
+    {'title_text': """
+¡welcome! to this
+introduction tour
+""",
+     'page_text': """\
+the oval [b]{get_text('next')}[/b] button below right
+switches to the next tour page.
+
+the red button with the [b]X[/b] cancels the tour.
+
+this tour no longer appears on app startup, as
+soon as all pages have been have been completed.
+
+further tours are available in the help mode.
+
+now tap the [b]{get_text('next')}[/b] button to go to
+the next tour page.
+""", },
+#----------------------------------
+'tour_page#page_switching':
+    {'title_text': "well done!",
+     'page_text': """\
+some app tours automatically switch
+to the next page.
+
+tapping the [b]{get_text('back')}[/b] button will bring
+you back to the last tour page.""", },
+#----------------------------------
+'tour_page#responsible_layout':
+    {'title_text': "self-adaptive layout",
+     'page_text': """\
+the layout of this app adapts flexibly
+to the resolution and orientation of the
+{"screen" if os_platform in ('ios', 'android') else "window"}.
+
+additionally most windows have a separate
+layouts for portrait and landscape format.
+
+right now the [b]{'landscape' if app.landscape else 'portrait'} format[/b]
+is displayed.
+
+now {'tilt the screen' if os_platform in ('android', 'ios') else 'change the window size'}
+""", },
+#----------------------------------
+'tour_page#tip_help_intro':
+    {'title_text': "help on tip",
+     'tip_text': """\
+Normally, this tooltip window displays the help text for a button.
+The arrow at the edge of the tooltip points to the button described.
+
+the button currently targeted by the arrow activates the tip help.
+a further tip on this button deactivates the help mode again.
+in addition, this button can also be used to cancel an app tour.""",
+     'page_text': """\
+When the help mode is activated all buttons
+are disabled and marked in blue.
+
+after the first tap on a button its help text
+gets displayed and the button gets re-enabled.
+
+so on a further tap on the same button the
+stored function will be executed.""", },
+#----------------------------------
+'tour_page#tip_help_tooltip':
+    {'title_text': "tooltip",
+     'page_text': """\
+the tooltip window now points to the button
+that opens the user preferences menu.
+
+a tap on the arrow of the tooltip window
+makes it transparent and allows you to
+select buttons hidden behind it.
+
+some tooltips show a question mark within
+a circle at the lower right-hand corner
+of the tooltip window. tapping on this
+circle starts a tour which explains the
+respective function in more detail.""", },
+#----------------------------------
+'tour_page#layout_font_size':
+    {'fade_out_app': 0.159,
+     'page_text': """\
+although this app can handle a wide range of screen
+resolutions, it can sometimes happen that screen elements
+overlap or are not fully displayed.
+
+if {'tilting this device' if os_platform in ('android', 'ios') else 'enlarging the window'} does not fix it,
+you can move the just highlighted slider leftwards to
+reduce the font size.""", },
+#----------------------------------
+'tour_page#tour_end':
+    {'title_text': "¡congratulations!",
+     'page_text': """\
+the introduction tour has reached its end.
+
+
+enter in the following popup window your
+nickname to stop this tour from being
+displayed at app startup.""", },
+#==================================
+"access right": "Access Right",
+"access_right_C": "Create/Register",
+"access_right_D": "Delete/Unregister",
+"access_right_U": "Update",
+"access_right_r": "Read",
+"access_right_x": "No/Revoked",
+"ado": "app documents",
+"app": "app data",
+"cwd": "current working directory",
+"de": "german",
+"doc": "documents",
+"en": "english",
+"es": "spanish",
+"usr": "user data",
+}

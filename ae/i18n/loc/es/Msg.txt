@@ -1,0 +1,268 @@
+{
+"": """\
+       [b]modo ayuda[/b]
+
+los elementos de la pantalla
+ahora son deshabilitados.
+
+* la primer puntea a un elemento
+   marcado de la pantalla muestra
+   el mensaje de ayuda asociada.
+
+* la segunda puntea va a ejecutar
+   la funcionalidad detras del
+   elemento de la pantalla.
+
+puntea de nuevo al signo de
+interrogación ([b]?[/b]) para
+salir de ese modo de ayuda.""",
+#==================================
+'help_app_state#font_size': """\
+ajustar el tamaño del fuente
+
+tamaño actual: [b]{round(self.value)}[/b]px""",
+#----------------------------------
+'help_app_state#pending_requests_frequency': """\
+frequencia para actualizar el
+progreso de los pedidos
+pendientes y animaciones
+
+frequencia actual: [b]{round(self.value, 1)}[/b]Hz""",
+#----------------------------------
+'help_app_state#sound_volume': """\
+volumen de sonidos
+
+para silenciar todos
+los sonidos puntea a
+la izquierda.
+
+volumen actual: [b]{round(self.value * 100)}[/b]%""",
+#----------------------------------
+'help_app_state#vibration_volume': """\
+intensidad vibración
+
+para silenciar todos
+los vibraciones puntea
+a la izquierda.
+
+vibración actual: [b]{round(self.value * 100)}[/b]%""",
+#==================================
+'help_flow#change_file_chooser_path': """\
+mostrando el
+contenido de
+esta carpeta""",
+#----------------------------------
+'help_flow#change_lang_code': """\
+cambiando el idioma
+a [b]'{main_app.get_txt_(self.lang_code)}'[/b].""",
+#----------------------------------
+'help_flow#change_light_theme': """\
+cambiando el color del
+fondo a [b]claro[/b] o a [b]oscuro[/b].""",
+#----------------------------------
+'help_flow#close_popup': """\
+cerrando
+esta ventana""",
+#----------------------------------
+'help_flow#open_color_editor':
+    {'': """\
+mostrando el editor
+de color.
+
+aquí puedes cambiar el
+color que indica si un
+registro sea
+[b]{dict(selected_item_ink='marcado',
+      unselected_item_ink='desmarcado',
+      flow_id_ink='seleccionado',
+      flow_path_ink='movible',
+      ).get(self.color_name)}[/b].""",
+    'after': """\
+en el editor de color
+puntea dos veces en rápida
+sucesión al círculo de color
+o usar los deslizadores para
+cambiar el color.
+
+puntea de nuevo en el botón
+de color para cerrar el editor
+de color.""", },
+#----------------------------------
+'help_flow#open_iterable_displayer':
+    {'': "mostrando detalles",
+     'next_help_id': 'help_flow#close_popup', },
+#----------------------------------
+'help_flow#open_user_preferences':
+    {'': """\
+este pomo del engranaje sirve para
+abrir la configuración del usuario.""",
+    'after': """\
+las opciones que se muestran ahora
+se utilizan para configurar el
+por ejemplo, para los colores
+y el tamaño de la letra.
+
+pulse en las opciones individuales
+para obtener más asistencia.""", },
+#----------------------------------
+'help_flow#select_file_chooser_path': """\
+mostrando el contenido
+de esta carpetas de la
+selección rápida""",
+#----------------------------------
+'help_flow#toggle_file_chooser_view': """\
+cambiar entre vista
+de lista o icono.
+
+punteando cambiaría
+a [b]vista de {'lista' if self.state == 'down' else 'icono'}[/b]""",
+#==================================
+'tour_page#':
+    {'title_text': """
+¡bienvenido! a esta
+tour de introducción
+""",
+     'page_text': """\
+el botón ovalado [b]{get_text('next')}[/b] abajo a la
+derecha pasa a la siguiente página del tour.
+
+el botón rojo con la [b]X[/b] aborta el tour.
+
+este tour ya no aparece al inicio la app, tan
+pronto como todas las páginas de ese tour se
+han completado.
+
+más tours están disponibles en el posterior
+presentado modo de ayuda.
+
+ahora puntea el botón [b]{get_text('next')}[/b] para ir al
+siguiente página del tour.
+""", },
+#----------------------------------
+'tour_page#page_switching':
+    {'title_text': "bien hecho!",
+     'page_text': """\
+algunos app tours cambian automáticamente
+a la página siguiente.
+
+puntea el botón [b]{get_text('back')}[/b] para
+volver a la página anterior.""", },
+#----------------------------------
+'tour_page#responsible_layout':
+    {'title_text': "disposición autoadaptativo",
+     'page_text': """\
+la disposición de esta aplicación se adapta con
+flexibilidad a la resolución y orientación de la
+{"pantalla" if os_platform in ('ios', 'android') else "ventana"}.
+
+Además, existen diseños separados para los
+formatos vertical y horizontal.
+
+ahora mismo se muestra el [b]formato {'horizontal' if app.landscape else 'vertical'}[/b].
+
+ahora {'inclina la pantalla' if os_platform in ('android', 'ios') else 'cambia el formato de la ventana'}
+""", },
+#----------------------------------
+'tour_page#tip_help_intro':
+    {'title_text': "ayuda a la puntea",
+     'tip_text': """\
+normalmente esta ventana de tooltip muestra el texto de ayuda de un botón.
+la flecha en el borde del tooltip apunta al botón descrito.
+
+el botón al que apunta la flecha en ese momento activa el modo de ayuda.
+punteando de nuevo sobre este botón desactiva de nuevo el modo de ayuda.
+este botón también se puede utilizar para cancelar un app tour.""",
+     'page_text': """\
+cuando se activa el modo de ayuda todos los
+botones están deshabilitados y marcados en azul.
+
+tras la primera pulsación de un botón se
+reactiva y se muestra su texto de ayuda.
+
+con otra puntea en el mismo botón se ejecutará
+la función asociada al botón.""", },
+#----------------------------------
+'tour_page#tip_help_tooltip':
+    {'title_text': "tooltip",
+     'page_text': """\
+la ventana de tooltip ahora apunta al botón que
+abre el menú de configuración del usuario.
+
+una puntea sobre la flecha de la ventana de
+tooltip lo hace transparente y permite la
+selección de botones ocultados detrás.
+
+en algunos textos de ayuda, aparece en la
+esquina inferior derecha del tooltip un signo
+de interrogación en un círculo. un toque en
+ese círculo inicia un app tour que explica la
+función respectiva con más detalle.""", },
+#----------------------------------
+'tour_page#layout_font_size':
+    {'fade_out_app': 0.159,
+     'page_text': """\
+aunque esta aplicación puede manejar una amplia gama
+de pantallas resoluciones, a veces puede ocurrir que
+los elementos de la pantalla se superponen o no se
+muestran completamente.
+
+si {'inclinando este dispositivo' if os_platform in ('android', 'ios') else 'redimensionando la ventana'} no es
+suficiente se puede reducir el tamaño de la fuente
+con el deslizador recién resaltado.""", },
+#----------------------------------
+'tour_page#tour_end':
+    {'title_text': "¡enhorabuena!",
+     'page_text': """\
+la tour de introducción ha llegado a su fin.
+
+
+introduzca su nombre de usuario en la siguiente
+ventana emergente/popup para detener este tour
+recorrido de aparecer en el inicio de la app.""", },
+#==================================
+"access right": "Derecho De Acceso",
+"access_right_C": "Crear/Registrar",
+"access_right_D": "Borrar/Deregistrar",
+"access_right_U": "Modificar",
+"access_right_r": "Leer",
+"access_right_x": "No/Revocar",
+"add": "añadir",
+"add user": "añadir usuario",
+"ado": "Documentos de la app",
+"app": "Data de la app",
+"back": "volver",
+"clipboard": "portapapeles",
+"Copy": "copiar",
+"create new user account": "crear una nueva cuenta de usuario",
+"Cut": "cortar",
+"cwd": "Carpeta Áctual",
+"dark": "oscuro",
+"de": "alemán",
+"delete": "borrar",
+"doc": "Documentos",
+"documents": "Documentos",
+"downloads": "Descargas",
+"en": "inglés",
+"error": "error",
+"es": "español",
+"Forget": "olvida",
+"home": "Carpeta Raíz del usuario",
+"light": "claro",
+"... loading ...": "... cargando ...",
+"Memorize": "memoriza",
+"music": "Música",
+"next": "seguir",
+"Paste": "inserta",
+"pictures": "Imágenes",
+"please enter your user or nick name": "por favor, introduzca su nombre de usuario",
+"please remove spaces and the characters '{''.join(ch for ch in user_name if ch not in chk_id)}' from your user name":
+    "por favor, elimine los caracteres '{''.join(ch for ch in user_name if ch not in chk_id)}' del nombre de usuario",
+"please shorten your user name to not more than {USER_NAME_MAX_LEN} characters":
+    "Por favor, acorte su nombre de usuario a no más de {USER_NAME_MAX_LEN} caracteres",
+"remove": "quitar",
+"save": "guardar",
+"Select All": "marcar todo",
+"user name": "nombre de usuario",
+"user name '{user_name}' already exists": "el nombre de usuario '{user_name}' ya existe",
+"usr": "Datos del usuario",
+}
