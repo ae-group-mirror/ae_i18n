@@ -15,7 +15,7 @@ translation texts locale paths
 ------------------------------
 
 multiple paths can be provided by your app as well as any python package and namespace portion to store translation
-texts. by default they are situated in a sub-folder with the name `loc` underneath of your app/package root folder. to
+texts. by default, they are situated in a sub-folder with the name `loc` underneath of your app/package root folder. to
 load them call the function :func:`register_package_translations` from the module using the locale texts.
 
 .. hint:: see e.g. the ae namespace portion :mod:`ae.gui_help` loading package/module specific translation messages.
@@ -60,9 +60,9 @@ the :paramref:`~get_text.count` keyword argument of :func:`get_text`::
 for pluralized message translated by the :func:`get_f_string` function, the count value have to be passed in the `count`
 item of the :paramref:`~get_f_string.loc_vars`::
 
-    print(get_f_string("you have {count] children", loc_vars=dict(count=1)))
+    print(get_f_string("you have {count} children", loc_vars=dict(count=1)))
     # -> "you have 1 child" or e.g. "Sie haben 1 Kind"
-    print(get_f_string("you have {count] children", loc_vars={'count': 3}))
+    print(get_f_string("you have {count} children", loc_vars={'count': 3}))
     # -> "you have 3 children" or "Sie haben 3 Kinder"
 
 you can load several languages into your app run-time. to get the translation for a language that is not the current
@@ -89,7 +89,7 @@ from ae.paths import Collector, normalize                                       
 from ae.dynamicod import try_eval                                                           # type: ignore
 
 
-__version__ = '0.3.27'
+__version__ = '0.3.28'
 
 
 MsgType = Union[str, Dict[str, str]]                        #: type of message literals in translation text files
@@ -289,7 +289,7 @@ def register_package_translations():
     """ call from module scope of the package to register/add translations resources path.
 
     no parameters needed because we use here :func:`~ae.base.stack_var` helper function to determine the
-    the module file path via the `__file__` module variable of the caller module in the call stack. in this call
+    module file path via the `__file__` module variable of the caller module in the call stack. in this call
     we have to overwrite the default value (:data:`~ae.base.SKIPPED_MODULES`) of the
     :paramref:`~ae.base.stack_var.skip_modules` parameter to not skip ae portions that are providing
     package resources and are listed in the :data:`~ae.base.SKIPPED_MODULES`, like e.g. :mod:`ae.gui_app` and
@@ -341,3 +341,6 @@ def translation(text: str, language: str = '') -> Optional[Union[str, MsgType]]:
         if text in translations:
             return translations[text]
     return None
+
+
+register_package_translations()

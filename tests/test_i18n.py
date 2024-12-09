@@ -71,7 +71,7 @@ class TestDeclarations:
 
     def test_installed_languages(self):
         assert isinstance(INSTALLED_LANGUAGES, list)
-        assert len(INSTALLED_LANGUAGES) == 0
+        assert len(INSTALLED_LANGUAGES) == 3    # the 3 languages ES, DE, EN of this package (see ae/loc/**)
 
 
 class TestMissingTranslation:
@@ -91,29 +91,31 @@ class TestMissingTranslation:
 
 
 class TestLangLoading:
-    def test_missing_languages(self):
-        assert not register_translations_path('tst')
-        assert not TRANSLATIONS_PATHS
-
-        assert not register_translations_path('test1')
-        assert not TRANSLATIONS_PATHS
-
-        assert not register_translations_path('test2')
-        assert not TRANSLATIONS_PATHS
+    def test_ignore_missing_language_path(self):
+        assert len(TRANSLATIONS_PATHS) == 1
+        assert not register_translations_path('path_not_exists')
+        assert len(TRANSLATIONS_PATHS) == 1
 
     def test_register_translations_path(self, lang_file_es):
-        assert not INSTALLED_LANGUAGES
-        register_translations_path()
-        assert not INSTALLED_LANGUAGES
+        assert len(TRANSLATIONS_PATHS) == 1
+        assert len(INSTALLED_LANGUAGES) == 3
+        assert len(LOADED_TRANSLATIONS) == 0
 
-        register_translations_path(TESTS_FOLDER)
-        assert INSTALLED_LANGUAGES
-        assert INSTALLED_LANGUAGES[0] == lang_file_es
+        register_translations_path()            # nothing to register in cwd
+        assert len(TRANSLATIONS_PATHS) == 1
+        assert len(INSTALLED_LANGUAGES) == 3
+        assert len(LOADED_TRANSLATIONS) == 0
+
+        register_translations_path(TESTS_FOLDER)    # register/import lang_file_es tests
+        assert len(TRANSLATIONS_PATHS) == 2
+        assert len(INSTALLED_LANGUAGES) == 3
+        # assert INSTALLED_LANGUAGES[0]=='en' == lang_file_es
+        assert len(LOADED_TRANSLATIONS) == 0
 
         register_translations_path()
-        assert not LOADED_TRANSLATIONS
+        assert len(LOADED_TRANSLATIONS) == 0
         assert default_language(lang_file_es) != lang_file_es       # change and load test language
-        assert LOADED_TRANSLATIONS
+        assert len(LOADED_TRANSLATIONS) == 1
         assert default_language() == lang_file_es
 
     def test_load_language_texts_str(self, lang_file_es):
