@@ -10,7 +10,7 @@
 "ado": "App Dokumente",
 "app": "App Data",
 "back": "zurück",
-"clipboard": "zwischenablage",
+"clipboard": "Zwischenablage",
 "Copy": "kopieren",
 "create new user account": "neues benutzerkonto anlegen",
 "Cut": "auschneiden",

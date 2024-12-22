@@ -89,7 +89,7 @@ from ae.paths import Collector, normalize                                       
 from ae.dynamicod import try_eval                                                           # type: ignore
 
 
-__version__ = '0.3.28'
+__version__ = '0.3.29'
 
 
 MsgType = Union[str, Dict[str, str]]                        #: type of message literals in translation text files
