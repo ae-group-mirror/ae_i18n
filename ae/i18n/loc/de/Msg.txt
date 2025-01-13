@@ -21,7 +21,7 @@
 "dark": "dunkel",
 "de": "deutsch",
 "delete": "löschen",
-"delete app theme {_th_id}": "lösche stilvorlage {_th_id}",
+"delete app theme {theme_id}": "lösche stilvorlage {theme_id}",
 "doc": "Dokumente",
 "documents": "Dokumente",
 "downloads": "Downloads",

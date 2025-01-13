@@ -11,30 +11,53 @@ changing the default language and translation texts encoding.
 additional languages will be automatically loaded by the function :func:`load_language_texts`.
 
 
-translation texts locale paths
-------------------------------
+translation texts files
+-----------------------
 
-multiple paths can be provided by your app as well as any python package and namespace portion to store translation
+translation files can be provided by your app as well as any python package and namespace portion to store translation
 texts. by default, they are situated in a sub-folder with the name `loc` underneath of your app/package root folder. to
 load them call the function :func:`register_package_translations` from the module using the locale texts.
 
-.. hint:: see e.g. the ae namespace portion :mod:`ae.gui_help` loading package/module specific translation messages.
+translation files get loaded and merged automatically when the module is imported. the translation texts provided by
+this portion will be loaded first. later imported packages would overwrite the translations with the same message id
+of earlier imported packages.
 
-.. hint::
-    the :meth:`~ae.gui_app.on_app_build` app event is used by :mod:`~ae.gui_help` to load the app-specific translation
-    texts on app startup.
+e.g. the ae portion :mod:`ae.gui_help` is automatically loading and merging their package/module specific
+translation messages on module/package import and could overwrite some of the translations provided by
+this portion.
 
-to specify additional locale folders you can use the function :func:`register_translations_path`.
+to specify additional locale folders with translation texts you can use the function :func:`register_translations_path`.
 
-in a locale folder have to exist at least one sub-folder with a name of the language code for each supported language
-(e.g. 'loc/en' for english).
+in a locale folder has to exist for each supported language a sub-folder named as the language code
+(e.g. 'loc/en' for english). and in each of these sub-folders has to exist at least one message translation file
+with a file name ending in the string specified by the constant :data:`MSG_FILE_SUFFIX`.
 
-in each of these sub-folders at least one message translation file with a file name ending in the string specified by
-the constant :data:`MSG_FILE_SUFFIX` has to exist.
+the content of these files has to be a valid python literal string, that can be evaluated into a dictionary of
+translation texts. the message to translate is the dictionary key and the values is either a string with the
+translated text or another dictionary of translations for a pluralized message.
+
+the following example shows the content of a translation file with 3 translatable message ids, the first one
+without pluralization, the second one with a single translation and the third one with all five posible
+pluralized translation forms::
+
+    {
+        "simple translatable message": "translated message text",
+        "simple pluralizable message": {'zero': "translated text if count == 0"},
+        "{count} children": {
+           'zero':      "no children",        # {count} would be replaced with `'0'`
+           'one':       "one child",          # help text if count == 1
+           'many':      "{count} children",
+           'negative':  "missing children",
+           '':          "undefined children"  # fallback help text if count is None
+        },
+    }
+
+the `count` value can be specified as a keyword argument to the translation functions :func:`get_text`
+and :func:`get_f_string`.
 
 
-translatable message texts and f-strings
-----------------------------------------
+translation functions
+---------------------
 
 simple message text strings can be enclosed in the code of your application with the :func:`get_text` function provided
 by this portion/module::
@@ -50,6 +73,10 @@ for more complex messages with placeholders you can use the :func:`get_f_string`
 
     my_var = 69
     print(get_f_string("The value of my_var is {my_var}."))
+
+.. note::
+    to ensure the translation text can be found in the message file, do **not** declare the message argument
+    passed to :func:`get_f_string` as an f-string expression (with an 'f' prefix).
 
 translatable message can also be provided in various pluralization forms. to get a pluralized message you have to pass
 the :paramref:`~get_text.count` keyword argument of :func:`get_text`::
@@ -72,11 +99,11 @@ onto the call of :func:`get_text` (or :func:`get_f_string`)::
     print(get_text("message", language='es'))   # returns the spanish translation text of "message"
     print(get_text("message", language='de'))   # returns the german translation text of "message"
 
-the helper function :func:`translation` can be used to determine if a translation exists for a message text.
-
 .. hint::
-    the ae portion :mod:`ae.kivy.i18n` is implementing translation messages for kv files and provides additional
-    helper functions and methods.
+    the ae portion :mod:`ae.kivy.i18n` is implementing additional translation
+    and helper functions especially for kv files and the Kivy framework.
+
+the helper function :func:`translation` can be used to determine if a translation exists for a message text.
 """
 import ast
 import locale
@@ -89,7 +116,7 @@ from ae.paths import Collector, normalize                                       
 from ae.dynamicod import try_eval                                                           # type: ignore
 
 
-__version__ = '0.3.31'
+__version__ = '0.3.32'
 
 
 MsgType = Union[str, Dict[str, str]]                        #: type of message literals in translation text files
