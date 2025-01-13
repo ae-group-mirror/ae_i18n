@@ -21,7 +21,7 @@
 "dark": "oscuro",
 "de": "alemán",
 "delete": "borrar",
-"delete app theme {_th_id}": "borrar plantilla {_th_id}",
+"delete app theme {theme_id}": "borrar plantilla {theme_id}",
 "doc": "Documentos",
 "documents": "Documentos",
 "downloads": "Descargas",
