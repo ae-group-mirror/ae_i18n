@@ -18,7 +18,7 @@ pluralize_keys = ('zero', 'one', 'many', 'negative', '', )
 
 @pytest.fixture
 def lang_file_es():
-    """ provide test message file for the language es_ES. """
+    """ provide the test message file for the language es_ES. """
     lang = 'es'
 
     fr = os.path.join(TESTS_FOLDER, 'loc')
@@ -40,7 +40,7 @@ def lang_file_es():
 
     yield lang
 
-    # check if file exists because some exception/error-check tests need to delete the file
+    # check if the file exists because some exception/error-check tests need to delete the file
     if os.path.exists(fn2):
         os.remove(fn2)
     if os.path.exists(fn):
