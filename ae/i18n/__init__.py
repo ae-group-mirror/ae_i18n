@@ -22,7 +22,7 @@ translation files get loaded and merged automatically when the module is importe
 this portion will be loaded first. later imported packages would overwrite the translations with the same message id
 of earlier imported packages.
 
-e.g., the ae portion :mod:`ae.gui_help` is automatically loading and merging their package/module specific
+e.g., the ae portion :mod:`ae.gui` is automatically loading and merging their package/module specific
 translation messages on module/package import and could overwrite some of the translations provided by
 this portion.
 
@@ -116,7 +116,7 @@ from ae.paths import Collector, normalize                                       
 from ae.dynamicod import try_eval                                                           # type: ignore
 
 
-__version__ = '0.3.33'
+__version__ = '0.3.34'
 
 
 MsgType = Union[str, Dict[str, str]]                        #: type of message literals in translation text files
@@ -314,12 +314,12 @@ def plural_key(count: Optional[int]) -> str:
 def register_package_translations():
     """ call from the module scope of the package to register/add the translation resources path.
 
-    no parameters needed because we use here :func:`~ae.base.stack_var` helper function to determine the
+    no parameters are needed because we use the :func:`~ae.base.stack_var` helper function to determine the
     module file path via the `__file__` module variable of the caller module in the call stack. in this call
     we have to overwrite the default value (:data:`~ae.base.SKIPPED_MODULES`) of the
     :paramref:`~ae.base.stack_var.skip_modules` parameter to not skip ae portions that are providing
-    package resources and are listed in the :data:`~ae.base.SKIPPED_MODULES`, like e.g. :mod:`ae.gui_app` and
-    :mod:`ae.gui_help` (passing empty string '' to overwrite the default skip list).
+    translation message resources and are listed in the :data:`~ae.base.SKIPPED_MODULES`, like e.g.
+    :mod:`ae.gui` (passing empty string '' to overwrite the default skip list).
     """
     package_path = os.path.dirname(norm_path(stack_var('__file__', '')))
     register_translations_path(package_path)
