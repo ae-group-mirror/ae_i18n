@@ -4,7 +4,7 @@ import pytest
 
 from ae.base import TESTS_FOLDER
 
-# noinspection PyProtectedMember
+
 from ae.i18n import (
     INSTALLED_LANGUAGES, LOADED_TRANSLATIONS, MSG_FILE_SUFFIX, TRANSLATIONS_PATHS,
     default_encoding, default_language, default_locale, get_text, get_f_string, load_language_texts,

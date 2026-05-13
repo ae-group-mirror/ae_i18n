@@ -110,13 +110,14 @@ import locale
 import os
 from typing import Any, Dict, List, Optional, Union
 
-from ae.base import norm_path, os_platform, stack_var, stack_vars                           # type: ignore
+from ae.base import norm_path                                                               # type: ignore
+from ae.system import os_platform, stack_var, stack_vars                                    # type: ignore
 from ae.files import read_file_text                                                         # type: ignore
 from ae.paths import Collector, normalize                                                   # type: ignore
 from ae.dynamicod import try_eval                                                           # type: ignore
 
 
-__version__ = '0.3.34'
+__version__ = '0.3.35'
 
 
 MsgType = Union[str, Dict[str, str]]                        #: type of message literals in translation text files
@@ -151,13 +152,13 @@ if os_platform == 'android':                                                    
             _LANG = ''
     _ENC = ''
 else:
-    _LANG, _ENC = locale.getdefaultlocale()  # type: ignore # mypy is not seeing the not _LANG checks (next code line)
-if not _LANG:
-    _LANG = DEF_LANGUAGE     # pragma: no cover
+    _LANG, _ENC = locale.getdefaultlocale()             # type: ignore # pylint: disable=deprecated-method
+if not _LANG:                                           # ignored mypy error on last line not seeing the not _LANG check
+    _LANG = DEF_LANGUAGE                                # pragma: no cover
 elif '_' in _LANG:
     _LANG = _LANG.split('_')[0]
 if not _ENC:
-    _ENC = DEF_ENCODING      # pragma: no cover
+    _ENC = DEF_ENCODING                                 # pragma: no cover
 default_locale: List[str] = [_LANG, _ENC]               #: language and encoding code of the current language/locale
 del _LANG, _ENC
 
@@ -314,14 +315,14 @@ def plural_key(count: Optional[int]) -> str:
 def register_package_translations():
     """ call from the module scope of the package to register/add the translation resources path.
 
-    no parameters are needed because we use the :func:`~ae.base.stack_var` helper function to determine the
+    no parameters are needed because we use the :func:`~ae.system.stack_var` helper function to determine the
     module file path via the `__file__` module variable of the caller module in the call stack. in this call
-    we have to overwrite the default value (:data:`~ae.base.SKIPPED_MODULES`) of the
-    :paramref:`~ae.base.stack_var.skip_modules` parameter to not skip ae portions that are providing
-    translation message resources and are listed in the :data:`~ae.base.SKIPPED_MODULES`, like e.g.
+    we have to overwrite the default value (:data:`~ae.system.SKIPPED_MODULES`) of the
+    :paramref:`~ae.system.stack_var.skip_modules` parameter to not skip ae portions that are providing
+    translation message resources and are listed in the :data:`~ae.system.SKIPPED_MODULES`, like e.g.
     :mod:`ae.gui` (passing empty string '' to overwrite the default skip list).
     """
-    package_path = os.path.dirname(norm_path(stack_var('__file__', '')))
+    package_path = os.path.dirname(norm_path(stack_var('__file__', '') or "."))
     register_translations_path(package_path)
 
 
