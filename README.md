@@ -1,16 +1,16 @@
-<!-- THIS FILE IS EXCLUSIVELY MAINTAINED by the project ae.ae V0.3.95 -->
-<!-- THIS FILE IS EXCLUSIVELY MAINTAINED by the project aedev.tpl_namespace_root V0.3.14 -->
-# i18n 0.3.34
+<!-- THIS FILE IS EXCLUSIVELY MAINTAINED by the project ae.ae v0.3.103 -->
+<!-- THIS FILE IS EXCLUSIVELY MAINTAINED by the project aedev.namespace_root_tpls v0.3.22 -->
+# i18n 0.3.35
 
 [![GitLab develop](https://img.shields.io/gitlab/pipeline/ae-group/ae_i18n/develop?logo=python)](
     https://gitlab.com/ae-group/ae_i18n)
 [![LatestPyPIrelease](
-    https://img.shields.io/gitlab/pipeline/ae-group/ae_i18n/release0.3.33?logo=python)](
-    https://gitlab.com/ae-group/ae_i18n/-/tree/release0.3.33)
+    https://img.shields.io/gitlab/pipeline/ae-group/ae_i18n/release0.3.35?logo=python)](
+    https://gitlab.com/ae-group/ae_i18n/-/tree/release0.3.35)
 [![PyPIVersions](https://img.shields.io/pypi/v/ae_i18n)](
     https://pypi.org/project/ae-i18n/#history)
 
->ae_i18n package 0.3.34.
+>ae namespace package portion i18n: internationalization / localization helpers.
 
 [![Coverage](https://ae-group.gitlab.io/ae_i18n/coverage.svg)](
     https://ae-group.gitlab.io/ae_i18n/coverage/index.html)
@@ -54,7 +54,7 @@ following command in the root folder of this repository
 (ae_i18n):
 
 ```shell script
-pip install -e .[dev]
+pip install --editable .[dev]
 ```
 
 the last command will install this package portion, along with the tools you need
