@@ -108,7 +108,7 @@ the helper function :func:`translation` can be used to determine if a translatio
 import ast
 import locale
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from ae.base import norm_path                                                               # type: ignore
 from ae.system import os_platform, stack_var, stack_vars                                    # type: ignore
@@ -117,23 +117,23 @@ from ae.paths import Collector, normalize                                       
 from ae.dynamicod import try_eval                                                           # type: ignore
 
 
-__version__ = '0.3.35'
+__version__ = '0.3.36'
 
 
-MsgType = Union[str, Dict[str, str]]                        #: type of message literals in translation text files
-LanguageMessages = Dict[str, MsgType]                       #: type of the data structure storing the loaded messages
+MsgType = str | dict[str, str]                              #: type of message literals in translation text files
+LanguageMessages = dict[str, MsgType]                       #: type of the data structure storing the loaded messages
 
 
 DEF_ENCODING = 'UTF-8'                                      #: encoding of the messages in your app code
 DEF_LANGUAGE = 'en'                                         #: language code of the messages in your app code
 
-INSTALLED_LANGUAGES: List[str] = []                         # list of language codes found in :data:`TRANSLATIONS_PATHS`
+INSTALLED_LANGUAGES: list[str] = []                         # list of language codes found in :data:`TRANSLATIONS_PATHS`
 
-LOADED_TRANSLATIONS: Dict[str, LanguageMessages] = {}       #: message text translations of all loaded languages
+LOADED_TRANSLATIONS: dict[str, LanguageMessages] = {}       #: message text translations of all loaded languages
 
 MSG_FILE_SUFFIX = 'Msg.txt'                                 #: name suffix of translation text files
 
-TRANSLATIONS_PATHS: List[str] = []                          #: file paths to search for translations
+TRANSLATIONS_PATHS: list[str] = []                          #: file paths to search for translations
 
 
 if os_platform == 'android':                                                                        # pragma: no cover
@@ -159,7 +159,7 @@ elif '_' in _LANG:
     _LANG = _LANG.split('_')[0]
 if not _ENC:
     _ENC = DEF_ENCODING                                 # pragma: no cover
-default_locale: List[str] = [_LANG, _ENC]               #: language and encoding code of the current language/locale
+default_locale: list[str] = [_LANG, _ENC]               #: language and encoding code of the current language/locale
 del _LANG, _ENC
 
 
@@ -190,7 +190,7 @@ def default_language(new_lang: str = '') -> str:
     return old_lang
 
 
-def get_text(text: str, count: Optional[int] = None, key_suffix: str = '', language: str = '') -> str:
+def get_text(text: str, count: int | None = None, key_suffix: str = '', language: str = '') -> str:
     """ translate passed text string into the current language.
 
     :param text:                text message to be translated.
@@ -210,7 +210,7 @@ def get_text(text: str, count: Optional[int] = None, key_suffix: str = '', langu
 
 
 def get_f_string(f_str: str, key_suffix: str = '', language: str = '',
-                 glo_vars: Optional[Dict[str, Any]] = None, loc_vars: Optional[Dict[str, Any]] = None
+                 glo_vars: dict[str, Any] | None = None, loc_vars: dict[str, Any] | None = None
                  ) -> str:
     """ translate the passed f-string into a message string of the passed / default language.
 
@@ -292,7 +292,7 @@ def load_language_texts(language: str = '', encoding: str = '', domain: str = ''
     return language
 
 
-def plural_key(count: Optional[int]) -> str:
+def plural_key(count: int | None) -> str:
     """ convert the number in :paramref:`~plural_key.count` into a dict key to access the correct plural form.
 
     :param count:               number of items used in the current context or None (resulting in empty string).
@@ -351,7 +351,7 @@ def register_translations_path(translation_path: str = "") -> bool:
     return True
 
 
-def translation(text: str, language: str = '') -> Optional[Union[str, MsgType]]:
+def translation(text: str, language: str = '') -> str | MsgType | None:
     """ determine translation for passed text string and language.
 
     :param text:                text message to be translated.
