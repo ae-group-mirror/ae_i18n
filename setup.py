@@ -1,4 +1,4 @@
-# THIS FILE IS EXCLUSIVELY MAINTAINED by the project aedev.project_tpls v0.3.77
+# THIS FILE IS EXCLUSIVELY MAINTAINED by the project aedev.project_tpls v0.3.79
 """ setup of ae namespace package portion i18n: internationalization / localization helpers. """
 import sys
 # noinspection PyUnresolvedReferences
@@ -67,17 +67,17 @@ setup_kwargs = {
     'name': 'ae_i18n',
     'package_data': {
         '': [
-            'loc/es/Msg.txt',
             'loc/de/Msg.txt',
             'loc/en/Msg.txt',
+            'loc/es/Msg.txt',
         ],
     },
     'packages': [
         'ae.i18n',
         'ae.i18n.loc',
-        'ae.i18n.loc.es',
         'ae.i18n.loc.de',
         'ae.i18n.loc.en',
+        'ae.i18n.loc.es',
     ],
     'project_urls': {
         'Bug Tracker': 'https://gitlab.com/ae-group/ae_i18n/-/issues',
@@ -87,7 +87,7 @@ setup_kwargs = {
     },
     'python_requires': '>=3.12',
     'url': 'https://gitlab.com/ae-group/ae_i18n',
-    'version': '0.3.35',
+    'version': '0.3.36',
     'zip_safe': False,
 }
 
