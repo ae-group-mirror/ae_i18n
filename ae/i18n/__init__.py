@@ -65,7 +65,7 @@ by this portion/module::
     from ae.i18n import get_text
 
     message = get_text("any translatable message displayed to the app user.")
-    print(message) # prints the translated message text
+    print(message)  # prints the translated message text
 
 for more complex messages with placeholders, you can use the :func:`get_f_string` function::
 
@@ -81,8 +81,8 @@ for more complex messages with placeholders, you can use the :func:`get_f_string
 translatable message can also be provided in various pluralization forms. to get a pluralized message, you have to pass
 the :paramref:`~get_text.count` keyword argument of :func:`get_text`::
 
-    print(get_text("child", count=1)) # translated into "child" (in English) or e.g. "Kind" in german
-    print(get_text("child", count=3)) # -> "children" (in English) or e.g. "Kinder" (in german)
+    print(get_text("child", count=1))  # translated into "child" (in English) or e.g. "Kind" in german
+    print(get_text("child", count=3))  # -> "children" (in English) or e.g. "Kinder" (in german)
 
 for pluralized message translated by the :func:`get_f_string` function, the count value has to be passed in the `count`
 item of the :paramref:`~get_f_string.loc_vars`::
@@ -96,8 +96,8 @@ you can load several languages into your app run-time. to get the translation fo
 default language, you have to pass the :paramref:`~get_text.language` keyword argument with the desired language code
 onto the call of :func:`get_text` or :func:`get_f_string`::
 
-    print(get_text("message", language='es')) # returns the Spanish translation text of "message"
-    print(get_text("message", language='de')) # returns the German translation text of "message"
+    print(get_text("message", language='es'))  # returns the Spanish translation text of "message"
+    print(get_text("message", language='de'))  # returns the German translation text of "message"
 
 .. hint::
     the ae portion :mod:`ae.kivy.i18n` is implementing additional translation
@@ -117,7 +117,7 @@ from ae.paths import Collector, normalize                                       
 from ae.dynamicod import try_eval                                                           # type: ignore
 
 
-__version__ = '0.3.36'
+__version__ = '0.3.37'
 
 
 MsgType = str | dict[str, str]                              #: type of message literals in translation text files
@@ -152,8 +152,9 @@ if os_platform == 'android':                                                    
             _LANG = ''
     _ENC = ''
 else:
-    _LANG, _ENC = locale.getdefaultlocale()             # type: ignore # pylint: disable=deprecated-method
-if not _LANG:                                           # ignored mypy error on last line not seeing the not _LANG check
+    _LANG = locale.getlocale()[0]
+    _ENC = locale.getencoding()
+if not _LANG:
     _LANG = DEF_LANGUAGE                                # pragma: no cover
 elif '_' in _LANG:
     _LANG = _LANG.split('_')[0]
