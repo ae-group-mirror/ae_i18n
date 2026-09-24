@@ -1,12 +1,18 @@
 """ ae.i18n unit tests. """
+import importlib
 import os
+import sys
+import types
+from unittest.mock import patch, MagicMock
 import pytest
+
+import ae.i18n          # for TestDeclaration unit tests mocking module reimport via importlib.reload
 
 from ae.base import TESTS_FOLDER
 
 
 from ae.i18n import (
-    INSTALLED_LANGUAGES, LOADED_TRANSLATIONS, MSG_FILE_SUFFIX, TRANSLATIONS_PATHS,
+    DEF_ENCODING, DEF_LANGUAGE, INSTALLED_LANGUAGES, LOADED_TRANSLATIONS, MSG_FILE_SUFFIX, TRANSLATIONS_PATHS,
     default_encoding, default_language, default_locale, get_text, get_f_string, load_language_texts,
     register_package_translations, register_translations_path)
 
@@ -54,7 +60,7 @@ def lang_file_es():
 glo_var = 'glo_var_val'
 
 
-class TestDeclarations:
+class TestDeclarationsNoModuleReload:   # see TestDefaultLocaleNoduleReloaded for more global var tests w/ module reload
     def test_default_locale(self):
         assert len(default_locale) >= 2
         assert default_locale[0]
@@ -280,3 +286,68 @@ class TestLocaleSwitch:
             assert default_encoding('yy_YY') == 'xx_XX'
         finally:
             default_encoding(old_enc)
+
+
+class TestDefaultLocaleModuleReloaded:
+    """ this test class has to be at the end because of importlib.reload() resetting other module vars """
+    @pytest.fixture(autouse=True)
+    def reset_module(self):
+        yield
+        importlib.reload(ae.i18n)
+
+    def test_default_locale(self):
+        with (patch('locale.getlocale', return_value=[None, None]),
+              patch('locale.getencoding', return_value="")):
+            importlib.reload(ae.i18n)
+        assert len(ae.i18n.default_locale) >= 2
+        assert isinstance(ae.i18n.default_locale[0], str)
+        assert ae.i18n.default_locale[0] == DEF_LANGUAGE
+        assert isinstance(ae.i18n.default_locale[1], str)
+        assert ae.i18n.default_locale[1] == DEF_ENCODING
+
+    def test_android_locale(self):
+        activity = MagicMock()
+        activity.getResources().getConfiguration().locale.toString.return_value = 'xx_ZZ'
+        jnius = types.ModuleType('jnius')
+        autoclass = MagicMock()
+        autoclass.return_value.mActivity = activity
+        jnius.autoclass = autoclass
+
+        with (patch('ae.system.os_platform', 'android'),
+              patch.dict(sys.modules, {'jnius': jnius})):
+            importlib.reload(ae.i18n)
+
+        assert ae.i18n.default_locale == ['xx', DEF_ENCODING]
+        autoclass.assert_called_once_with('org.kivy.android.PythonActivity')
+
+    def test_android_locale_fallback_to_get_locales(self):
+        activity = MagicMock()
+        configuration = activity.getResources().getConfiguration()
+        configuration.locale.toString.side_effect = ValueError
+        configuration.getLocales().get.return_value.toString.return_value = 'xx-YY'
+        jnius = types.ModuleType('jnius')
+        autoclass = MagicMock()
+        autoclass.return_value.mActivity = activity
+        jnius.autoclass = autoclass
+
+        with (patch('ae.system.os_platform', 'android'),
+              patch.dict(sys.modules, {'jnius': jnius})):
+            importlib.reload(ae.i18n)
+
+        assert ae.i18n.default_locale == ['xx-YY', DEF_ENCODING]
+
+    def test_android_locale_fallback_without_locale(self):
+        activity = MagicMock()
+        configuration = activity.getResources().getConfiguration()
+        configuration.locale.toString.side_effect = ValueError
+        configuration.getLocales().get.side_effect = ValueError
+        jnius = types.ModuleType('jnius')
+        autoclass = MagicMock()
+        autoclass.return_value.mActivity = activity
+        jnius.autoclass = autoclass
+
+        with (patch('ae.system.os_platform', 'android'),
+              patch.dict(sys.modules, {'jnius': jnius})):
+            importlib.reload(ae.i18n)
+
+        assert ae.i18n.default_locale == [DEF_LANGUAGE, DEF_ENCODING]

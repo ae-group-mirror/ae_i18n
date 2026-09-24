@@ -2,6 +2,6 @@
 # pyjnius/jnius only needed on android
 ae_base
 ae_system
+ae_dynamicod
 ae_files
 ae_paths
-ae_dynamicod
