@@ -1,4 +1,4 @@
-# THIS FILE IS EXCLUSIVELY MAINTAINED by the project aedev.project_tpls v0.3.98
+# THIS FILE IS EXCLUSIVELY MAINTAINED by the project aedev.project_tpls v0.3.103
 """ setup of ae namespace package portion i18n: internationalization / localization helpers. """
 import pathlib
 import sys
@@ -50,9 +50,9 @@ setup_kwargs: dict[str, Any] = {
     'install_requires': [
         'ae_base',
         'ae_system',
+        'ae_dynamicod',
         'ae_files',
         'ae_paths',
-        'ae_dynamicod',
     ],
     'keywords': [
         'configuration',
@@ -86,7 +86,7 @@ setup_kwargs: dict[str, Any] = {
     },
     'python_requires': '>=3.12',
     'url': 'https://gitlab.com/ae-group/ae_i18n',
-    'version': '0.3.37',
+    'version': '0.3.38',
     'zip_safe': False,
 }
 

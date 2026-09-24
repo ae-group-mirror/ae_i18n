@@ -106,6 +106,7 @@ onto the call of :func:`get_text` or :func:`get_f_string`::
 the helper function :func:`translation` can be used to determine if a translation exists for a message text.
 """
 import ast
+import importlib
 import locale
 import os
 from typing import Any
@@ -117,7 +118,7 @@ from ae.paths import Collector, normalize                                       
 from ae.dynamicod import try_eval                                                           # type: ignore
 
 
-__version__ = '0.3.37'
+__version__ = '0.3.38'
 
 
 MsgType = str | dict[str, str]                              #: type of message literals in translation text files
@@ -136,30 +137,27 @@ MSG_FILE_SUFFIX = 'Msg.txt'                                 #: name suffix of tr
 TRANSLATIONS_PATHS: list[str] = []                          #: file paths to search for translations
 
 
-if os_platform == 'android':                                                                        # pragma: no cover
-    from jnius import autoclass                                                                     # type: ignore
-
+if os_platform == 'android':
+    autoclass = importlib.import_module('jnius').autoclass  # from jnius import autoclass
     mActivity = autoclass('org.kivy.android.PythonActivity').mActivity
-    # noinspection PyBroadException
     try:
         # copied from https://github.com/HelloZeroNet/ZeroNet-kivy/blob/master/src/platform_android.py
         _LANG = mActivity.getResources().getConfiguration().locale.toString()   # deprecated since API level 24
-    except Exception:                                   # pylint: disable=broad-except
-        # noinspection PyBroadException
+    except (ValueError, Exception):                         # pylint: disable=broad-except
         try:
             _LANG = mActivity.getResources().getConfiguration().getLocales().get(0).toString()
-        except Exception:                               # pylint: disable=broad-except
+        except (ValueError, Exception):                     # pylint: disable=broad-except
             _LANG = ''
     _ENC = ''
 else:
     _LANG = locale.getlocale()[0]
     _ENC = locale.getencoding()
 if not _LANG:
-    _LANG = DEF_LANGUAGE                                # pragma: no cover
+    _LANG = DEF_LANGUAGE
 elif '_' in _LANG:
     _LANG = _LANG.split('_')[0]
 if not _ENC:
-    _ENC = DEF_ENCODING                                 # pragma: no cover
+    _ENC = DEF_ENCODING
 default_locale: list[str] = [_LANG, _ENC]               #: language and encoding code of the current language/locale
 del _LANG, _ENC
 
