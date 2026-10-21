@@ -118,7 +118,7 @@ from ae.system import os_platform, stack_var, stack_vars                        
 from ae.paths import I18N_FOLDER, normalize, resources_folder_names, Collector              # type: ignore
 
 
-__version__ = '0.3.39'
+__version__ = '0.3.40'
 
 
 MsgType = str | dict[str, str]                              #: type of message literals in translation text files
@@ -145,7 +145,7 @@ if os_platform == 'android':
 else:
     _LANG = locale.getlocale()[0]
     _ENC = locale.getencoding()
-if not _LANG:
+if not _LANG or _LANG == 'C':   # can be 'C' on some POSIX system and gitlab.com CI (LC_CTYPE=C.UTF-8)
     _LANG = 'en'
 elif '_' in _LANG:
     _LANG = _LANG.split('_')[0]
