@@ -1,12 +1,12 @@
 <!-- THIS FILE IS EXCLUSIVELY MAINTAINED by the project ae.ae v0.3.110 -->
 <!-- THIS FILE IS EXCLUSIVELY MAINTAINED by the project aedev.namespace_root_tpls v0.3.33 -->
-# i18n 0.3.38
+# i18n 0.3.39
 
 [![GitLab develop](https://img.shields.io/gitlab/pipeline/ae-group/ae_i18n/develop?logo=python)](
     https://gitlab.com/ae-group/ae_i18n)
 [![LatestPyPIrelease](
-    https://img.shields.io/gitlab/pipeline/ae-group/ae_i18n/release0.3.38?logo=python)](
-    https://gitlab.com/ae-group/ae_i18n/-/tree/release0.3.38)
+    https://img.shields.io/gitlab/pipeline/ae-group/ae_i18n/release0.3.39?logo=python)](
+    https://gitlab.com/ae-group/ae_i18n/-/tree/release0.3.39)
 [![PyPIVersions](https://img.shields.io/pypi/v/ae_i18n)](
     https://pypi.org/project/ae-i18n/#history)
 
